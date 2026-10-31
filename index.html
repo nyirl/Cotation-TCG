@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Estimer la valeur de vos cartes Magic et Pokémon</title>
+<title>Cote : estimer la valeur de vos cartes Magic et Pokémon</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
@@ -226,6 +226,37 @@ body::before{content:""; display:block; height:6px; background:var(--stripe)}
   .fan{min-height:200px}
 }
 @media (prefers-reduced-motion: reduce){.fan button{animation:none}}
+/* ----- Thèmes Lorcana, Altered, Riftbound ----- */
+body[data-game="lorcana"]{
+  --accent:#B83A62; --accent-ink:#FFFFFF;
+  --hero-1:#43183D; --hero-2:#A23B67; --hero-ink:#FFF1F6; --hero-glow:#FFD3E3;
+  --hero-chip:rgba(255,255,255,.16); --hero-btn:#FFD3E3; --hero-btn-ink:#43183D;
+  --stripe:linear-gradient(90deg,#43183D,#E26A8D,#F6C453);
+}
+body[data-game="altered"]{
+  --accent:#B8510B; --accent-ink:#FFFFFF;
+  --hero-1:#1E2430; --hero-2:#3B465A; --hero-ink:#F2F4F8; --hero-glow:#FF9F43;
+  --hero-chip:rgba(255,255,255,.14); --hero-btn:#FF9F43; --hero-btn-ink:#1E2430;
+  --stripe:linear-gradient(90deg,#1E2430,#FF9F43);
+}
+body[data-game="riftbound"]{
+  --accent:#0B7A85; --accent-ink:#FFFFFF;
+  --hero-1:#06182B; --hero-2:#0D4B66; --hero-ink:#E8FBFF; --hero-glow:#0AC8B9;
+  --hero-chip:rgba(255,255,255,.14); --hero-btn:#0AC8B9; --hero-btn-ink:#04202B;
+  --stripe:linear-gradient(90deg,#06182B,#0AC8B9,#C8AA6E);
+}
+@media (prefers-color-scheme: dark){
+  body[data-game="lorcana"]{--accent:#FF93B4; --accent-ink:#3A0E22}
+  body[data-game="altered"]{--accent:#FFA45C; --accent-ink:#2A1202}
+  body[data-game="riftbound"]{--accent:#3EDBD0; --accent-ink:#04202B}
+}
+.seg.games{flex-wrap:wrap; gap:6px; border:0; background:none; overflow:visible}
+.seg.games button{border:1px solid var(--line); border-radius:99px; background:var(--surface)}
+.seg.games button + button{border-left:1px solid var(--line)}
+.seg.games button[aria-pressed="true"]{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+.row input.base{width:6em}
+.fxnote{margin:10px 0 0; font-size:.88rem; color:var(--muted)}
+
 .nocard{display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center; padding:10px 0 4px}
 .nocard svg{width:130px; height:auto; color:var(--accent)}
 
@@ -235,11 +266,14 @@ body::before{content:""; display:block; height:6px; background:var(--stripe)}
 <a class="skip" href="#main">Aller au contenu</a>
 
 <header class="top">
-  <h1 class="brand">Cotation TCG</h1>
+  <h1 class="brand">Cote</h1>
   <nav class="bar" aria-label="Navigation principale">
-    <div class="seg" role="group" aria-label="Jeu">
+    <div class="seg games" role="group" aria-label="Jeu">
       <button type="button" data-game="mtg" aria-pressed="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z"/></svg>Magic</button>
       <button type="button" data-game="pokemon" aria-pressed="false"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg>Pokémon</button>
+      <button type="button" data-game="lorcana" aria-pressed="false"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z"/></svg>Lorcana</button>
+      <button type="button" data-game="altered" aria-pressed="false"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8.7 5v10L12 22l-8.7-5V7z"/></svg>Altered</button>
+      <button type="button" data-game="riftbound" aria-pressed="false"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l9 10-9 10-9-10z"/></svg>Riftbound</button>
     </div>
     <div class="seg" role="group" aria-label="Vue">
       <button type="button" data-view="search" aria-pressed="true">Recherche</button>
@@ -278,8 +312,8 @@ body::before{content:""; display:block; height:6px; background:var(--stripe)}
 </main>
 
 <footer>
-  <p>Prix indicatifs fournis par Scryfall (Magic) et TCGdex (Pokémon), à partir de Cardmarket et TCGplayer. Ils ne remplacent ni une expertise ni un grading professionnel.</p>
-  <p style="margin-top:8px">Projet de fan non officiel, sans lien avec Wizards of the Coast, Nintendo, Creatures Inc. ni GAME FREAK. Magic : The Gathering est une marque de Wizards of the Coast. Pokémon est une marque de Nintendo, Creatures Inc. et GAME FREAK. Les images de cartes viennent de Scryfall et de TCGdex ; les illustrations des cartes appartiennent à leurs auteurs et éditeurs. Les décors du site sont des créations originales.</p>
+  <p>Prix indicatifs fournis par Scryfall (Magic), TCGdex (Pokémon) et Lorcast (Lorcana, prix TCGplayer en dollars convertis en euros au taux de la BCE). Pour Altered et Riftbound, le prix de base est saisi par vous à partir du marché consulté. Ils ne remplacent ni une expertise ni un grading professionnel.</p>
+  <p style="margin-top:8px">Projet de fan non officiel, sans lien avec Wizards of the Coast, Nintendo, Creatures Inc., GAME FREAK, Disney, Ravensburger, Equinox ni Riot Games. Magic : The Gathering, Pokémon, Disney Lorcana, Altered et Riftbound sont des marques de leurs propriétaires. Les images de cartes viennent de Scryfall, TCGdex, Lorcast, Riftcodex et de la base communautaire Altered ; les illustrations des cartes appartiennent à leurs auteurs et éditeurs. Les décors du site sont des créations originales.</p>
 </footer>
 
 <dialog id="settings" aria-labelledby="settingsTitle">
@@ -402,6 +436,7 @@ let settings = {
   coef: {...DEFAULTS.coef, ...(stored.coef || {})},
 };
 let binder = load('cote.binder', []);
+let manualPrices = load('cote.manual', {});
 const persistBinder = () => save('cote.binder', binder);
 
 /* ---------- Accès aux API ---------- */
@@ -468,14 +503,121 @@ function normPoke(d, lang){
   };
 }
 
+/* ----- Lorcana (Lorcast, prix en dollars convertis en euros) ----- */
+const fx = {rate:null, date:'', fallback:false};
+async function ensureRate(){
+  if(fx.rate) return;
+  try{
+    const c = JSON.parse(sessionStorage.getItem('cote.fx') || 'null');
+    if(c && c.rate && c.day === new Date().toISOString().slice(0, 10)){ fx.rate = c.rate; fx.date = c.date; return; }
+  }catch{}
+  try{
+    const d = await getJSON('https://api.frankfurter.dev/v1/latest?base=USD&symbols=EUR');
+    const r = num(d.rates && d.rates.EUR);
+    if(!r) throw new Error('taux');
+    fx.rate = r; fx.date = d.date || '';
+    try{ sessionStorage.setItem('cote.fx', JSON.stringify({rate:r, date:fx.date, day:new Date().toISOString().slice(0, 10)})); }catch{}
+  }catch{
+    fx.rate = 0.87; fx.fallback = true; fx.date = '';
+  }
+}
+let lcLast = 0;
+const lcCache = new Map();
+async function lorcast(path){
+  const url = 'https://api.lorcast.com/v0' + path;
+  if(lcCache.has(url)) return lcCache.get(url);
+  const wait = Math.max(0, lcLast + 110 - Date.now());  // Lorcast demande 50 à 100 ms entre deux appels
+  if(wait) await sleep(wait);
+  lcLast = Date.now();
+  const d = await getJSON(url);
+  lcCache.set(url, d);
+  return d;
+}
+const lcList = d => d.results || d.data || (Array.isArray(d) ? d : []);
+const lcImages = c => (c.image_uris && (c.image_uris.digital || c.image_uris)) || null;
+
+function normLorcana(c){
+  const im = lcImages(c) || {};
+  const p = c.prices || {};
+  const rate = fx.rate || 0.87;
+  const toEur = v => { const n = num(v); return n == null ? null : n * rate; };
+  const nU = num(p.usd), fU = num(p.usd_foil);
+  const finishes = [];
+  if(nU != null) finishes.push({key:'normal', label:'Normale', eur:{trend:toEur(nU)}, usd:nU});
+  if(fU != null) finishes.push({key:'foil', label:'Foil', eur:{trend:toEur(fU)}, usd:fU});
+  if(!finishes.length) finishes.push({key:'normal', label:'Normale', eur:{trend:null}, usd:null});
+  const set = c.set || {};
+  return {
+    game:'lorcana', id:c.id, lang:'en', name:c.version ? `${c.name}, ${c.version}` : c.name,
+    setName:set.name || '', setCode:set.code || '', number:c.collector_number,
+    rarity:c.rarity || '', image:im.small || im.normal, imageLarge:im.large || im.normal,
+    finishes, needsDetail:false, updated:null, fx:true,
+    links:[{href:'https://www.cardmarket.com/fr/Lorcana/Products/Search?searchString=' + encodeURIComponent(c.name), label:'Chercher sur Cardmarket'}],
+  };
+}
+
+/* ----- Riftbound (Riftcodex pour les cartes, prix saisis) ----- */
+function normRift(c){
+  const cl = c.classification || {}, set = c.set || {}, md = c.metadata || {}, me = c.media || {};
+  const rid = c.riftbound_id || '';
+  const suffix = md.signature ? '-signature' : (md.alternate_art || md.overnumbered ? '-showcase' : '');
+  const links = [];
+  if(rid) links.push({href:`https://riftbound.zone/fr/prices/${rid}${suffix}/?market=eu`, label:'Voir le prix sur Riftbound Zone'});
+  links.push({href:'https://www.cardmarket.com/fr/Riftbound/Products/Search?searchString=' + encodeURIComponent(c.name), label:'Chercher sur Cardmarket'});
+  return {
+    game:'riftbound', id:c.id, lang:'en', name:c.name, setName:set.label || '', setCode:(set.set_id || '').toUpperCase(),
+    number:c.collector_number, rarity:cl.rarity || '', image:me.image_url, imageLarge:me.image_url,
+    finishes:[{key:'manual', label:'Prix saisi', eur:{}, manualKey:'riftbound|' + c.id}],
+    links, needsDetail:false, updated:null,
+  };
+}
+
+/* ----- Altered (index local des cartes Communes et Rares, prix saisis) ----- */
+const ALT_IMG = 'https://altered-prod-eu.s3.amazonaws.com/Art/';
+const ALT_RARITY = {COMMON:'Commune', RARE:'Rare', EXALTED:'Exaltée'};
+const ALT_FACTION = {AX:'Axiom', BR:'Bravos', LY:'Lyra', MU:'Muna', OR:'Ordis', YZ:'Yzmir', NE:'Neutre'};
+const alteredLang = () => state.lang === 'en' ? 'en' : 'fr';
+const fold = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+let alteredP = null;
+function loadAltered(){
+  if(!alteredP) alteredP = fetch('altered-index.json')
+    .then(r => { if(!r.ok) throw new Error('index'); return r.json(); })
+    .then(d => {
+      d.cards.forEach(c => { c._f = fold(c.nf) + '|' + fold(c.ne); });
+      return {sets:d.sets || {}, cards:d.cards, byRef:new Map(d.cards.map(c => [c.r, c]))};
+    })
+    .catch(() => { alteredP = null; const e = new Error('index'); e.code = 'index'; throw e; });
+  return alteredP;
+}
+function normAltered(e, idx, lang){
+  const img = (lang === 'fr' ? (e.if || e.ie) : (e.ie || e.if));
+  return {
+    game:'altered', id:e.r, lang, name:lang === 'fr' ? e.nf : e.ne, setName:idx.sets[e.s] || e.s, setCode:e.s, number:'',
+    rarity:[ALT_RARITY[e.ra] || e.ra, ALT_FACTION[e.fa] || e.fa].filter(Boolean).join(', '),
+    image:img ? ALT_IMG + img : null, imageLarge:img ? ALT_IMG + img : null,
+    finishes:[{key:'manual', label:'Prix saisi', eur:{}, manualKey:'altered|' + e.r}],
+    links:[{href:'https://qr.altered.gg/' + e.r, label:'Voir la carte sur altered.gg'}],
+    needsDetail:false, updated:null,
+  };
+}
+
 async function fetchCard(game, id, lang){
   if(game === 'mtg') return normMtg(await getJSON('https://api.scryfall.com/cards/' + encodeURIComponent(id)));
+  if(game === 'lorcana'){ await ensureRate(); return normLorcana(await lorcast('/cards/' + encodeURIComponent(id))); }
+  if(game === 'riftbound') return normRift(await getJSON('https://api.riftcodex.com/cards/' + encodeURIComponent(id)));
+  if(game === 'altered'){
+    const idx = await loadAltered();
+    const e = idx.byRef.get(id);
+    if(!e) throw new Error('Introuvable');
+    return normAltered(e, idx, lang);
+  }
   return normPoke(await getJSON(`https://api.tcgdex.net/v2/${lang}/cards/${encodeURIComponent(id)}`), lang);
 }
 
 /* ---------- Calcul de la cote ---------- */
 function basePrice(f){
   if(!f) return null;
+  if(f.manualKey){ const m = manualPrices[f.manualKey]; return m == null ? null : m; }
   const e = f.eur || {};
   const v = e[settings.ref];
   if(v != null) return v;
@@ -505,6 +647,36 @@ function setStatus(msg){ $('#status').textContent = msg || ''; }
 
 /* ---------- Recherche ---------- */
 async function runQuery(t, fuzzy){
+  if(state.game === 'lorcana'){
+    await ensureRate();
+    try{
+      const arr = lcList(await lorcast('/cards/search?q=' + encodeURIComponent(t)));
+      return {results:arr.map(normLorcana), total:arr.length, label:t};
+    }catch(e){ if(e.status === 404) return {results:[], total:0, label:t}; throw e; }
+  }
+  if(state.game === 'riftbound'){
+    const base = 'https://api.riftcodex.com/cards';
+    let items = [];
+    try{
+      const d = await getJSON(base + '/name?size=100&fuzzy=' + encodeURIComponent(t));
+      items = d.items || [];
+    }catch(e){ if(e.status !== 404) throw e; }
+    if(!items.length){
+      try{ items = (await getJSON(base + '/search?size=100&query=' + encodeURIComponent(t))).items || []; }
+      catch(e){ if(e.status !== 404) throw e; }
+    }
+    return {results:items.map(normRift), total:items.length, label:t};
+  }
+  if(state.game === 'altered'){
+    const idx = await loadAltered();
+    const lang = alteredLang(), q = fold(t);
+    const hits = idx.cards.filter(c => c._f.includes(q));
+    hits.sort((a, b) => {
+      const an = fold(lang === 'fr' ? a.nf : a.ne).startsWith(q) ? 0 : 1, bn = fold(lang === 'fr' ? b.nf : b.ne).startsWith(q) ? 0 : 1;
+      return an - bn || a.r.localeCompare(b.r);
+    });
+    return {results:hits.map(e => normAltered(e, idx, lang)), total:hits.length, label:t};
+  }
   if(state.game === 'mtg'){
     let query = t, label = t;
     if(fuzzy){
@@ -557,7 +729,9 @@ async function search(q, opts = {}){
     if(e.status === 404){ state.results = []; state.total = 0; setStatus(''); }
     else{
       state.results = null;
-      setStatus('Impossible de joindre le service de prix. Vérifiez votre connexion, puis relancez la recherche.');
+      setStatus(e.code === 'index'
+        ? 'La liste des cartes Altered est introuvable. Le fichier altered-index.json doit se trouver à côté de index.html, et la page doit être ouverte depuis un site (Netlify, par exemple), pas depuis un fichier local.'
+        : 'Impossible de joindre le service de prix. Vérifiez votre connexion, puis relancez la recherche.');
     }
   }
   renderResults();
@@ -588,7 +762,25 @@ async function selectCard(card){
   renderResults(); renderDetail();
 }
 
-/* ---------- Décors originaux et vitrine ---------- */
+/* ---------- Jeux, décors originaux et vitrine ---------- */
+const GAMES = {
+  mtg:{label:'Magic', ph:'Nom de la carte, par exemple Lightning Bolt', title:'Combien vaut votre carte Magic ?', scan:true, art:'arcane',
+    ex:['Lightning Bolt', 'Black Lotus', 'Sol Ring'], none:'Aucune carte trouvée. Vérifiez l’orthographe ou cherchez le nom anglais de la carte.',
+    gems:['#F5EDD0', '#4DA3E8', '#5A5266', '#E5533D', '#4FA36A']},
+  pokemon:{label:'Pokémon', ph:'Nom du Pokémon, par exemple Dracaufeu', title:'Combien vaut votre carte Pokémon ?', scan:true, art:'burst',
+    ex:[], none:'Aucune carte trouvée. Saisissez le nom dans la langue choisie (par exemple Dracaufeu en français, Charizard en anglais).',
+    glyphs:['flame', 'drop', 'leaf', 'bolt', 'star']},
+  lorcana:{label:'Lorcana', ph:'Nom du personnage, par exemple Elsa', title:'Combien vaut votre carte Lorcana ?', scan:false, art:'sparkle',
+    ex:['Elsa', 'Mickey Mouse', 'Stitch'], none:'Aucune carte trouvée. Cherchez le nom anglais du personnage (par exemple Elsa, Stitch).',
+    gems:['#F3B63F', '#8E5BC8', '#3DAA6D', '#D8443E', '#3B82D6', '#8A93A1']},
+  altered:{label:'Altered', ph:'Nom de la carte, par exemple Sierra', title:'Combien vaut votre carte Altered ?', scan:false, art:'nested',
+    ex:['Sierra'], none:'Aucune carte Commune ou Rare trouvée. Les cartes Uniques ne sont pas dans la base.',
+    gems:['#8C432A', '#C8473A', '#E58AA6', '#3E8E5A', '#E0A93B', '#5A6FD6']},
+  riftbound:{label:'Riftbound', ph:'Nom de la carte, par exemple Jinx', title:'Combien vaut votre carte Riftbound ?', scan:false, art:'honeycomb',
+    ex:['Jinx', 'Ahri', 'Yasuo'], none:'Aucune carte trouvée. Cherchez le nom anglais de la carte (par exemple Jinx, Ahri).',
+    gems:['#CB222D', '#4DAF7C', '#3B82D6', '#D6823B', '#8E5BC8', '#E5C14A']},
+};
+
 const GLYPHS = {
   flame:'M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z',
   drop:'M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z',
@@ -597,6 +789,8 @@ const GLYPHS = {
   star:'M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z',
 };
 const f1 = n => n.toFixed(1);
+const spark = (x, y, k) => `<path transform="translate(${x} ${y}) scale(${k})" d="M0-12Q0 0 12 0Q0 0 0 12Q0 0-12 0Q0 0 0-12Z" fill="currentColor"/>`;
+const hexPts = (cx, cy, r, rot) => Array.from({length:6}, (_, i) => { const a = rot + i * Math.PI / 3; return f1(cx + r * Math.cos(a)) + ',' + f1(cy + r * Math.sin(a)); }).join(' ');
 
 function arcaneSVG(){
   let s = '<svg viewBox="0 0 400 400" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">';
@@ -636,16 +830,41 @@ function cardBackSVG(){
     + '<path d="M63 73V103M48 88H78" stroke-width="1.5"/></svg>';
 }
 
+
+function sparkleSVG(){
+  let s = '<svg viewBox="0 0 400 400" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">';
+  s += '<circle cx="200" cy="200" r="170" stroke-dasharray="2 9" stroke-linecap="round"/><circle cx="200" cy="200" r="120"/><circle cx="200" cy="200" r="70" stroke-dasharray="1 7" stroke-linecap="round"/>';
+  for(let i = 0; i < 12; i++){ const a = i * Math.PI / 6; s += spark(f1(200 + 170 * Math.cos(a)), f1(200 + 170 * Math.sin(a)), i % 3 === 0 ? 2.4 : 1.3); }
+  return s + spark(200, 200, 4.5) + '</svg>';
+}
+function nestedHexSVG(){
+  let s = '<svg viewBox="0 0 400 400" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">';
+  for(let i = 0; i < 7; i++) s += `<polygon points="${hexPts(200, 200, 188 - i * 26, i * Math.PI / 18)}"/>`;
+  for(let i = 0; i < 6; i++){ const a = i * Math.PI / 3; s += `<line x1="200" y1="200" x2="${f1(200 + 188 * Math.cos(a))}" y2="${f1(200 + 188 * Math.sin(a))}"/>`; }
+  return s + '</svg>';
+}
+function honeycombSVG(){
+  const r = 34, w = Math.sqrt(3) * r, hgt = 1.5 * r;
+  let s = '<svg viewBox="0 0 400 400" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">';
+  for(let row = -5; row <= 5; row++) for(let col = -5; col <= 5; col++){
+    const cx = 200 + col * w + (row % 2 ? w / 2 : 0), cy = 200 + row * hgt, d = Math.hypot(cx - 200, cy - 200);
+    if(d < 178) s += `<polygon points="${hexPts(cx, cy, r - 3, Math.PI / 6)}"${d < 62 ? ' fill="currentColor" fill-opacity=".45"' : ''}/>`;
+  }
+  return s + '</svg>';
+}
+const ART = {arcane:arcaneSVG, burst:burstSVG, sparkle:sparkleSVG, nested:nestedHexSVG, honeycomb:honeycombSVG};
+
 function badgesEl(){
   const box = h('div', {class:'badges', 'aria-hidden':'true'});
-  if(state.game === 'mtg'){
-    ['#F5EDD0', '#4DA3E8', '#5A5266', '#E5533D', '#4FA36A'].forEach((c, i) => {
+  const g = GAMES[state.game];
+  if(g.gems){
+    g.gems.forEach((c, i) => {
       const sp = h('span', {class:'gem'});
       sp.innerHTML = `<svg viewBox="0 0 34 34"><defs><radialGradient id="gem${i}" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".85"/><stop offset=".45" stop-color="${c}"/><stop offset="1" stop-color="${c}" stop-opacity=".7"/></radialGradient></defs><circle cx="17" cy="17" r="14" fill="url(#gem${i})" stroke="rgba(255,255,255,.55)" stroke-width="1.5"/></svg>`;
       box.append(sp);
     });
   }else{
-    ['flame', 'drop', 'leaf', 'bolt', 'star'].forEach(k => {
+    g.glyphs.forEach(k => {
       const sp = h('span');
       sp.innerHTML = `<svg viewBox="0 0 24 24"><path d="${GLYPHS[k]}"/></svg>`;
       box.append(sp);
@@ -657,16 +876,17 @@ function badgesEl(){
 const MTG_SHOW = ['Lightning Bolt', 'Serra Angel', 'Shivan Dragon', 'Counterspell', 'Llanowar Elves', 'Birds of Paradise', 'Black Lotus', 'Wrath of God', 'Giant Growth', 'Sol Ring'];
 const POKE_SHOW = ['2', '4', '10', '15', '58', '6', '8', '1'];
 const showcase = {};
-const showKey = () => state.game === 'mtg' ? 'mtg' : 'pokemon-' + state.lang;
+const showKey = () => state.game === 'pokemon' ? 'pokemon-' + state.lang : state.game === 'altered' ? 'altered-' + alteredLang() : state.game;
 const shuffle = a => [...a].sort(() => Math.random() - 0.5);
 
 async function loadShowcase(){
   const key = showKey();
   if(showcase[key]) return;
   showcase[key] = [];
+  const g = state.game;
   try{
     let items = [];
-    if(state.game === 'mtg'){
+    if(g === 'mtg'){
       const q = '(' + shuffle(MTG_SHOW).slice(0, 5).map(n => `!"${n}"`).join(' or ') + ') game:paper';
       const data = await getJSON('https://api.scryfall.com/cards/search?unique=cards&order=name&q=' + encodeURIComponent(q));
       items = data.data.map(c => {
@@ -674,12 +894,25 @@ async function loadShowcase(){
         const im = f.image_uris || {};
         return {name:c.printed_name || c.name, image:im.normal || im.small};
       });
-    }else{
+    }else if(g === 'pokemon'){
       const set = await getJSON(`https://api.tcgdex.net/v2/${state.lang}/sets/base1`);
       items = shuffle(POKE_SHOW).slice(0, 5)
         .map(id => (set.cards || []).find(c => c.localId === id))
         .filter(c => c && c.image)
         .map(c => ({name:c.name, image:c.image + '/low.webp'}));
+    }else if(g === 'lorcana'){
+      const arr = lcList(await lorcast('/cards/search?q=' + encodeURIComponent('rarity:legendary'))).filter(c => lcImages(c));
+      items = shuffle(arr).slice(0, 5).map(c => { const im = lcImages(c); return {name:c.name, image:im.normal || im.small}; });
+    }else if(g === 'riftbound'){
+      const d = await getJSON('https://api.riftcodex.com/cards?size=100&set_id=ogn&sort=collector_number');
+      const all = (d.items || []).filter(c => c.media && c.media.image_url);
+      const nice = all.filter(c => c.classification && ['Epic', 'Rare'].includes(c.classification.rarity));
+      items = shuffle(nice.length >= 5 ? nice : all).slice(0, 5).map(c => ({name:c.name, image:c.media.image_url}));
+    }else if(g === 'altered'){
+      const idx = await loadAltered();
+      const lang = alteredLang();
+      items = shuffle(idx.cards.filter(c => c.ra === 'RARE' && (lang === 'fr' ? c.if : c.ie))).slice(0, 5)
+        .map(c => ({name:lang === 'fr' ? c.nf : c.ne, image:ALT_IMG + (lang === 'fr' ? (c.if || c.ie) : (c.ie || c.if))}));
     }
     showcase[key] = items.filter(i => i.image);
   }catch{ showcase[key] = []; }
@@ -687,7 +920,7 @@ async function loadShowcase(){
 }
 
 function heroEl(){
-  const g = state.game;
+  const g = state.game, cfg = GAMES[g];
   const items = showcase[showKey()] || [];
   const mid = (Math.max(items.length, 3) - 1) / 2;
   const fan = h('div', {class:'fan'});
@@ -699,14 +932,21 @@ function heroEl(){
     fan.innerHTML = [0, 1, 2].map(i => cardBackSVG().replace('class="back"', `class="back" style="--r:${(i - 1) * 8}deg; --y:${Math.abs(i - 1) * 8}px"`)).join('');
   }
   const art = h('div', {class:'hero-art', 'aria-hidden':'true'});
-  art.innerHTML = g === 'mtg' ? arcaneSVG() : burstSVG();
+  art.innerHTML = ART[cfg.art]();
+  const manual = g === 'altered' || g === 'riftbound';
   return h('div', {class:'hero'},
     art,
     h('div', {class:'hero-copy'},
-      h('h2', {text:g === 'mtg' ? 'Combien vaut votre carte Magic ?' : 'Combien vaut votre carte Pokémon ?'}),
-      h('p', {text:'Cherchez-la par son nom ou scannez-la avec la caméra. Choisissez son état pour obtenir sa cote.'}),
+      h('h2', {text:cfg.title}),
+      h('p', {text:cfg.scan
+        ? 'Cherchez-la par son nom ou scannez-la avec la caméra. Choisissez son état pour obtenir sa cote.'
+        : manual
+          ? 'Cherchez-la par son nom, relevez son prix sur le marché, puis choisissez son état pour obtenir sa cote.'
+          : 'Cherchez-la par son nom, puis choisissez son état pour obtenir sa cote.'}),
       h('div', {class:'hero-actions'},
-        h('button', {type:'button', class:'primary', text:'Scanner une carte', onclick:openScanner}),
+        cfg.scan
+          ? h('button', {type:'button', class:'primary', text:'Scanner une carte', onclick:openScanner})
+          : h('button', {type:'button', class:'primary', text:'Chercher une carte', onclick:() => $('#q').focus()}),
         examples().map(ex => h('button', {type:'button', class:'chip', text:ex, onclick:() => { $('#q').value = ex; search(ex); }}))),
       badgesEl()),
     fan);
@@ -721,10 +961,12 @@ function thumb(c){
 }
 
 function examples(){
-  if(state.game === 'mtg') return ['Lightning Bolt', 'Black Lotus', 'Sol Ring'];
-  if(state.lang === 'fr') return ['Dracaufeu', 'Pikachu', 'Mewtwo'];
-  if(state.lang === 'en') return ['Charizard', 'Pikachu', 'Mewtwo'];
-  return ['Pikachu'];
+  if(state.game === 'pokemon'){
+    if(state.lang === 'fr') return ['Dracaufeu', 'Pikachu', 'Mewtwo'];
+    if(state.lang === 'en') return ['Charizard', 'Pikachu', 'Mewtwo'];
+    return ['Pikachu'];
+  }
+  return GAMES[state.game].ex;
 }
 
 function renderResults(){
@@ -736,9 +978,7 @@ function renderResults(){
   }
   if(!state.results.length){
     if(!state.query) return;
-    const hint = state.game === 'pokemon'
-      ? 'Aucune carte trouvée. Saisissez le nom dans la langue choisie (par exemple Dracaufeu en français, Charizard en anglais).'
-      : 'Aucune carte trouvée. Vérifiez l’orthographe ou cherchez le nom anglais de la carte.';
+    const hint = GAMES[state.game].none;
     if(state.query) box.append(h('p', {class:'hint', text:hint}));
     return;
   }
@@ -752,7 +992,7 @@ function renderResults(){
       h('span', {class:'t-name', text:c.name}),
       h('span', {class:'t-set', text:setLine}),
       numMatch(c, state.scanNum) ? h('span', {class:'t-match', text:'Numéro lu'}) : null,
-      f ? h('span', {class:'t-price', text:eur(basePrice(f))}) : null
+      (f && (!f.manualKey || basePrice(f) != null)) ? h('span', {class:'t-price', text:eur(basePrice(f))}) : null
     ));
   });
   box.append(grid);
@@ -817,11 +1057,24 @@ function renderDetail(){
     }})
   ));
 
+  if(f.manualKey){
+    const cur = manualPrices[f.manualKey];
+    el.append(h('div', {class:'field'},
+      h('label', {class:'lbl', for:'manualPrice', text:'Prix de base observé (en euros)'}),
+      h('input', {id:'manualPrice', type:'number', min:'0', step:'0.01', inputmode:'decimal', value:cur == null ? '' : String(cur), onchange:e => {
+        const v = parseFloat(String(e.target.value).replace(',', '.'));
+        if(isFinite(v) && v >= 0) manualPrices[f.manualKey] = v; else delete manualPrices[f.manualKey];
+        save('cote.manual', manualPrices); renderDetail(); renderResults();
+      }}),
+      h('p', {class:'cond-note', text:'Relevez le prix d’un exemplaire Near Mint sur le site ci-dessous, puis saisissez-le ici. Il est mémorisé pour cette carte.'})));
+    appendLinks(el, c);
+  }
+
   const base = basePrice(f);
   const unit = base == null ? null : base * coefOf(cond.k);
   const tag = h('div', {class:'tag'}, h('span', {class:'lbl', text:'Cote estimée'}), h('span', {class:'amount', text:eur(unit)}));
   if(base == null){
-    tag.append(h('span', {class:'sub', text:'Aucun prix disponible pour cette finition. Essayez-en une autre.'}));
+    tag.append(h('span', {class:'sub', text:f.manualKey ? 'Saisissez un prix de base ci-dessus pour obtenir la cote.' : 'Aucun prix disponible pour cette finition. Essayez-en une autre.'}));
   }else{
     const sub = h('span', {class:'sub'}, `Base ${eur(base)} × ${settings.coef[cond.k]} % (${cond.k})`);
     if(state.qty > 1) sub.append(h('br'), `Total pour ${state.qty} cartes : `, h('strong', {text:eur(unit * state.qty)}));
@@ -835,11 +1088,18 @@ function renderDetail(){
       if(f.eur[k] == null) return;
       dl.append(h('dt', {text:label + ' (Cardmarket)'}), h('dd', {class:k === settings.ref ? 'used' : '', text:eur(f.eur[k])}));
     });
-  }else{
+  }else if(c.game === 'mtg'){
     dl.append(h('dt', {text:'Prix Cardmarket (via Scryfall)'}), h('dd', {class:'used', text:eur(f.eur.trend)}));
+  }else if(c.game === 'lorcana'){
+    dl.append(h('dt', {text:'Prix converti en euros'}), h('dd', {class:'used', text:eur(f.eur.trend)}));
   }
   if(f.usd != null) dl.append(h('dt', {text:'Prix TCGplayer (référence)'}), h('dd', {text:usd(f.usd)}));
-  el.append(dl);
+  if(dl.children.length) el.append(dl);
+  if(c.fx && f.usd != null){
+    el.append(h('p', {class:'fxnote', text:fx.fallback
+      ? `Conversion au taux indicatif de ${fx.rate} (service de change indisponible).`
+      : `Dollars convertis au taux de ${fx.rate.toFixed(4)}${fx.date ? ' (' + new Date(fx.date).toLocaleDateString('fr-FR') + ')' : ''}.`}));
+  }
   if(c.updated){
     const d = new Date(c.updated);
     if(!isNaN(d)) el.append(h('p', {class:'note', text:'Prix Cardmarket du ' + d.toLocaleDateString('fr-FR') + '.'}));
@@ -848,7 +1108,7 @@ function renderDetail(){
   const actions = h('div', {class:'actions'},
     h('button', {type:'button', class:'primary', text:'Ajouter au classeur', onclick:() => addToBinder(c, f, cond.k, state.qty)}));
   el.append(actions);
-  appendLinks(el, c);
+  if(!f.manualKey) appendLinks(el, c);
 }
 
 function appendLinks(el, c){
@@ -859,12 +1119,13 @@ function appendLinks(el, c){
 /* ---------- Classeur ---------- */
 function addToBinder(card, f, cond, qty){
   const base = basePrice(f);
+  if(base == null && f.manualKey){ toast('Saisissez d’abord un prix de base.'); return; }
   const same = binder.find(i => i.game === card.game && i.id === card.id && i.lang === card.lang && i.finish === f.key && i.cond === cond);
   if(same){ same.qty = Math.min(999, same.qty + qty); same.base = base != null ? base : same.base; same.ts = Date.now(); }
   else binder.push({
     uid:Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
     game:card.game, id:card.id, lang:card.lang, name:card.name, setName:card.setName || card.setCode, number:card.number,
-    image:card.image, finish:f.key, finishLabel:f.label, cond, qty, base, ts:Date.now(),
+    image:card.image, finish:f.key, finishLabel:f.label, cond, qty, base, manualKey:f.manualKey || null, ts:Date.now(),
   });
   persistBinder(); renderBinder();
   toast(`${card.name} ajoutée au classeur`);
@@ -910,14 +1171,19 @@ function renderBinder(){
     const qty = h('input', {type:'number', min:'1', max:'999', value:String(it.qty), 'aria-label':'Quantité de ' + it.name, onchange:e => {
       it.qty = Math.max(1, Math.min(999, parseInt(e.target.value, 10) || 1)); persistBinder(); renderBinder();
     }});
+    const priceInput = it.manualKey ? h('input', {class:'base', type:'number', min:'0', step:'0.01', inputmode:'decimal', value:it.base == null ? '' : String(it.base), 'aria-label':'Prix de base de ' + it.name, title:'Prix de base en euros', onchange:e => {
+      const v = parseFloat(String(e.target.value).replace(',', '.'));
+      if(isFinite(v) && v >= 0){ it.base = v; it.ts = Date.now(); manualPrices[it.manualKey] = v; save('cote.manual', manualPrices); }
+      persistBinder(); renderBinder();
+    }}) : null;
     list.append(h('li', {class:'row'},
       thumbEl,
       h('div', {class:'info'},
         h('strong', {text:it.name}),
-        h('span', {text:[it.setName, it.number ? 'n° ' + it.number : '', it.finishLabel].filter(Boolean).join(', ')}),
+        h('span', {text:[(GAMES[it.game] || {}).label, it.setName, it.number ? 'n° ' + it.number : '', it.finishLabel].filter(Boolean).join(', ')}),
         h('span', {text:it.base == null ? 'Prix indisponible' : `Prix de base ${eur(it.base)}${date ? ', relevé le ' + date : ''}`})
       ),
-      h('div', {class:'controls'}, sel, qty,
+      h('div', {class:'controls'}, sel, qty, priceInput,
         h('span', {class:'value', text:u == null ? 'n/d' : eur(u * it.qty)}),
         h('button', {type:'button', class:'ghost', text:'Retirer', 'aria-label':'Retirer ' + it.name + ' du classeur', onclick:() => {
           binder = binder.filter(x => x.uid !== it.uid); persistBinder(); renderBinder();
@@ -932,9 +1198,10 @@ async function refreshBinder(){
   const btn = $('#refreshBtn');
   btn.disabled = true;
   const cache = new Map();
-  let done = 0, failed = 0;
+  let done = 0, failed = 0, skipped = 0;
   for(const it of binder){
     const key = `${it.game}|${it.id}|${it.lang}`;
+    if(it.manualKey){ done++; skipped++; continue; }
     try{
       let card = cache.get(key);
       if(!card){ card = await fetchCard(it.game, it.id, it.lang); cache.set(key, card); await sleep(120); }
@@ -946,7 +1213,8 @@ async function refreshBinder(){
     setBinderStatus(`Actualisation en cours : ${done} sur ${binder.length}…`);
   }
   persistBinder(); renderBinder();
-  setBinderStatus(failed ? `Actualisation terminée, ${failed} carte${failed > 1 ? 's' : ''} non mise${failed > 1 ? 's' : ''} à jour.` : 'Tous les prix sont à jour.');
+  const note = skipped ? ` ${skipped} ligne${skipped > 1 ? 's' : ''} à prix saisi (Altered, Riftbound) ${skipped > 1 ? 'ne sont' : 'n’est'} pas actualisée${skipped > 1 ? 's' : ''} : modifiez le prix à la main.` : '';
+  setBinderStatus((failed ? `Actualisation terminée, ${failed} carte${failed > 1 ? 's' : ''} non mise${failed > 1 ? 's' : ''} à jour.` : (skipped === binder.length ? 'Aucun prix à actualiser automatiquement.' : 'Prix actualisés.')) + note);
 }
 
 function exportCSV(){
@@ -954,7 +1222,7 @@ function exportCSV(){
   const f2 = v => v == null ? '' : v.toFixed(2).replace('.', ',');
   const rows = binder.map(it => {
     const u = unitValue(it);
-    return [it.game === 'mtg' ? 'Magic' : 'Pokémon', it.name, it.setName || '', it.number || '', it.finishLabel, it.cond, it.qty,
+    return [(GAMES[it.game] || {label:it.game}).label, it.name, it.setName || '', it.number || '', it.finishLabel, it.cond, it.qty,
       f2(it.base), f2(u), f2(u == null ? null : u * it.qty), it.ts ? new Date(it.ts).toLocaleDateString('fr-FR') : ''];
   });
   const esc = v => { const s = String(v); return /[";\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
@@ -1365,8 +1633,12 @@ function setGame(g){
   state.game = g; state.results = null; state.selected = null; state.query = ''; state.loading = false; state.error = '';
   selToken++;
   document.querySelectorAll('[data-game]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.game === g)));
-  $('#lang').hidden = g !== 'pokemon';
-  $('#q').placeholder = g === 'mtg' ? 'Nom de la carte, par exemple Lightning Bolt' : 'Nom du Pokémon, par exemple Dracaufeu';
+  const langSel = $('#lang');
+  langSel.hidden = !(g === 'pokemon' || g === 'altered');
+  [...langSel.options].forEach(o => { o.disabled = g === 'altered' && !['fr', 'en'].includes(o.value); });
+  if(g === 'altered' && !['fr', 'en'].includes(state.lang)){ state.lang = 'fr'; langSel.value = 'fr'; }
+  $('#scanBtn').hidden = !GAMES[g].scan;
+  $('#q').placeholder = GAMES[g].ph;
   $('#q').value = '';
   setStatus('');
   renderResults(); renderDetail();
@@ -1408,6 +1680,7 @@ $('#settingsForm').addEventListener('submit', e => {
 });
 
 document.body.dataset.game = state.game;
+$('#scanBtn').hidden = !GAMES[state.game].scan;
 renderResults(); renderDetail(); renderBinder();
 loadShowcase();
 })();
