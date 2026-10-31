@@ -1,0 +1,1416 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estimer la valeur de vos cartes Magic et Pokémon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EBEFF4; --surface:#FFFFFF; --ink:#14213D; --muted:#56627D; --line:#D2D9E4;
+  --accent:#2B47F0; --accent-ink:#FFFFFF;
+  --tag-bg:#14213D; --tag-fg:#F4F6FB; --tag-muted:#A9B4CE;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#0E1424; --surface:#161F36; --ink:#E9EDF7; --muted:#9AA6C2; --line:#27324F;
+    --accent:#8CA0FF; --accent-ink:#0E1424;
+    --tag-bg:#E9EDF7; --tag-fg:#14213D; --tag-muted:#4B5877;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Bricolage Grotesque", system-ui, "Segoe UI", Roboto, sans-serif;
+  font-size:16px; line-height:1.5; font-variant-numeric:tabular-nums;
+}
+button,input,select{font:inherit; color:inherit}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+.skip{position:absolute; left:-999px; top:8px; background:var(--surface); padding:8px 12px; border-radius:8px; z-index:20}
+.skip:focus{left:8px}
+
+.wrap{max-width:1280px; margin:0 auto; padding:0 20px}
+.top{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px 28px; padding:22px 20px 14px; max-width:1280px; margin:0 auto}
+.brand{margin:0; font-size:2.6rem; font-weight:800; letter-spacing:-.04em; line-height:1}
+.bar{display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px}
+
+.seg{display:inline-flex; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--surface)}
+.seg button{border:0; background:transparent; padding:9px 16px; cursor:pointer; font-weight:600; color:var(--muted)}
+.seg button + button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--paper)}
+.seg button:hover:not([aria-pressed="true"]){color:var(--ink)}
+.seg.small button{padding:7px 12px; font-size:.92rem}
+.badge{display:inline-block; min-width:1.5em; padding:0 6px; margin-left:4px; border-radius:99px; background:var(--line); color:var(--ink); font-size:.8rem; text-align:center}
+[aria-pressed="true"] .badge{background:var(--paper); color:var(--ink)}
+
+.ghost{border:1px solid transparent; background:transparent; padding:9px 12px; border-radius:10px; cursor:pointer; color:var(--muted); font-weight:600}
+.ghost:hover{color:var(--ink); border-color:var(--line)}
+.primary{border:0; background:var(--accent); color:var(--accent-ink); padding:11px 20px; border-radius:10px; font-weight:700; cursor:pointer}
+.primary:hover{filter:brightness(1.08)}
+.secondary{border:1px solid var(--line); background:var(--surface); padding:9px 14px; border-radius:10px; cursor:pointer; font-weight:600}
+.secondary:hover{border-color:var(--accent)}
+.danger:hover{border-color:#C0392B; color:#C0392B}
+button:disabled{opacity:.55; cursor:progress}
+
+main{max-width:1280px; margin:0 auto; padding:8px 20px 40px}
+.search{display:flex; flex-wrap:wrap; gap:10px; margin:8px 0 6px}
+.search input[type=search], .search select, .field input, .field select, .row select, .row input{
+  border:1px solid var(--line); background:var(--surface); border-radius:10px; padding:11px 14px;
+}
+.search input[type=search]{flex:1 1 280px; min-width:0; font-size:1.1rem}
+.status{min-height:1.6em; margin:6px 2px 14px; color:var(--muted)}
+
+.layout{display:grid; grid-template-columns:minmax(0,1fr) 370px; gap:24px; align-items:start}
+#detail{
+  position:sticky; top:16px; max-height:calc(100vh - 32px); overflow:auto;
+  background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:20px;
+}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  #detail{position:static; max-height:none; order:-1}
+}
+
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(148px,1fr)); gap:14px}
+.tile{
+  display:flex; flex-direction:column; gap:4px; text-align:left; padding:8px 8px 10px;
+  background:var(--surface); border:1px solid var(--line); border-radius:10px; cursor:pointer;
+  transition:border-color .12s;
+}
+.tile:hover{border-color:var(--accent)}
+.tile[aria-pressed="true"]{outline:3px solid var(--accent); outline-offset:0; border-color:var(--accent)}
+.thumb{width:100%; aspect-ratio:63/88; object-fit:cover; border-radius:6px; background:var(--line); display:block}
+.thumb.ph{display:grid; place-items:center; padding:8px; text-align:center; color:var(--muted); font-size:.85rem}
+.t-name{font-weight:700; line-height:1.25; margin-top:4px}
+.t-set{font-size:.82rem; color:var(--muted); line-height:1.3}
+.t-price{font-weight:700; margin-top:2px}
+.more{margin:18px auto 0; display:block}
+
+.hint,.muted{color:var(--muted)}
+.empty{background:var(--surface); border:1px dashed var(--line); border-radius:14px; padding:28px}
+.empty h2{margin:0 0 6px; font-size:1.5rem; letter-spacing:-.02em; line-height:1.2}
+.empty p{margin:0 0 16px; max-width:60ch}
+.chips{display:flex; flex-wrap:wrap; gap:8px}
+.chip{border:1px solid var(--line); background:var(--paper); border-radius:99px; padding:7px 14px; cursor:pointer; font-weight:600}
+.chip:hover{border-color:var(--accent)}
+
+/* Fiche de cote */
+.art{display:block; width:100%; max-width:250px; margin:0 auto 14px; aspect-ratio:63/88; object-fit:cover; border-radius:10px; background:var(--line); box-shadow:0 6px 18px rgba(10,20,50,.22)}
+#detail h2{margin:0; font-size:1.5rem; line-height:1.2; letter-spacing:-.02em}
+.meta{margin:2px 0 14px; color:var(--muted); font-size:.95rem}
+.field{margin:14px 0 0}
+.field > .lbl{display:block; font-weight:600; margin-bottom:6px}
+.field .seg{display:flex; flex-wrap:wrap}
+.field .seg button{flex:1 1 auto; padding:8px 10px}
+.cond-note{margin:6px 0 0; font-size:.92rem; color:var(--muted)}
+.field input[type=number]{width:6.5em}
+
+.tag{position:relative; margin-top:18px; padding:16px 18px 16px 46px; border-radius:12px; background:var(--tag-bg); color:var(--tag-fg)}
+.tag::before{content:""; position:absolute; left:17px; top:50%; translate:0 -50%; width:14px; height:14px; border-radius:50%; background:var(--tag-hole, var(--surface)); box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+.tag .lbl{display:block; font-size:.95rem; color:var(--tag-muted)}
+.tag .amount{display:block; font-size:2.7rem; line-height:1.05; font-weight:800; letter-spacing:-.035em}
+.tag .sub{display:block; margin-top:10px; padding-top:9px; border-top:1px dashed var(--tag-muted); font-size:.92rem; color:var(--tag-muted)}
+.tag .sub strong{color:var(--tag-fg)}
+.tag.total{--tag-hole:var(--paper); max-width:460px; margin:6px 0 16px}
+
+.refs{display:grid; grid-template-columns:1fr auto; gap:4px 12px; margin:16px 0 0; font-size:.95rem}
+.refs dt{color:var(--muted)}
+.refs dd{margin:0; text-align:right}
+.refs .used{font-weight:700; color:var(--ink)}
+.note{margin:10px 0 0; font-size:.88rem; color:var(--muted)}
+.actions{display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; align-items:center}
+.actions a{color:var(--accent); font-weight:600}
+
+/* Classeur */
+.toolbar{display:flex; flex-wrap:wrap; gap:10px; margin:0 0 8px}
+.list{list-style:none; margin:14px 0 0; padding:0; display:grid; gap:10px}
+.row{display:grid; grid-template-columns:56px minmax(0,1fr); gap:8px 14px; align-items:center; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:10px 12px}
+.row img,.row .ph{width:56px; aspect-ratio:63/88; object-fit:cover; border-radius:5px; background:var(--line)}
+.row .info{display:flex; flex-direction:column; min-width:0}
+.row .info span{font-size:.9rem; color:var(--muted)}
+.row .controls{grid-column:1 / -1; display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.row input[type=number]{width:5.5em}
+.row .value{margin-left:auto; font-weight:800; font-size:1.2rem; min-width:6em; text-align:right}
+@media (min-width:900px){
+  .row{grid-template-columns:56px minmax(0,1fr) auto}
+  .row .controls{grid-column:auto}
+}
+
+footer{max-width:1280px; margin:0 auto; padding:0 20px 36px; color:var(--muted); font-size:.88rem}
+footer p{max-width:90ch; margin:0}
+
+dialog{border:1px solid var(--line); border-radius:14px; background:var(--surface); color:var(--ink); padding:24px; width:calc(100% - 32px); max-width:480px}
+dialog::backdrop{background:rgba(10,15,30,.55)}
+dialog h2{margin:0 0 4px; font-size:1.4rem}
+.coefs{display:grid; grid-template-columns:1fr 6em; gap:8px 14px; align-items:center; margin:14px 0}
+.coefs input,.dlg-field select{border:1px solid var(--line); background:var(--surface); border-radius:8px; padding:8px 10px; width:100%}
+.dlg-actions{display:flex; flex-wrap:wrap; gap:10px; margin-top:18px}
+
+#toast{position:fixed; left:50%; bottom:22px; translate:-50% 0; background:var(--ink); color:var(--paper); padding:10px 18px; border-radius:99px; font-weight:600; z-index:30; max-width:calc(100% - 32px)}
+#toast:empty{display:none}
+
+.scan-opts{display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; margin-top:12px}
+.scan-opts label{display:flex; gap:8px; align-items:center; font-weight:600}
+.scan-opts select{border:1px solid var(--line); background:var(--surface); border-radius:8px; padding:6px 8px; max-width:15em}
+#scanDebug canvas{display:block; width:100%; max-width:520px; margin-top:6px; border:1px solid var(--line); border-radius:6px}
+.t-match{font-size:.8rem; font-weight:700; color:var(--accent)}
+#scanner{max-width:660px}
+.cam{position:relative; width:min(100%, calc(68vh * var(--ar, 1.777))); margin:12px auto 0; aspect-ratio:var(--ar, 1.777); background:#000; border-radius:10px; overflow:hidden}
+.cam video{width:100%; height:100%; object-fit:contain; display:block}
+.cam{touch-action:none; cursor:grab}
+.cam canvas{width:100%; height:100%; display:block}
+.cam .frame{position:absolute; left:50%; top:50%; translate:-50% -50%; border:3px solid #fff; border-radius:8px; box-shadow:0 0 0 999px rgba(0,0,0,.5); pointer-events:none}
+.cam .frame::before{content:""; position:absolute; left:3%; top:2%; width:77%; height:13%; border:2px dashed rgba(255,255,255,.9); border-radius:4px}
+.cam .frame::after{content:""; position:absolute; left:0; right:0; bottom:0; height:10%; border-top:2px dashed rgba(255,255,255,.9)}
+#scanner{padding:0; overflow:hidden}
+#scanner[open]{display:flex; flex-direction:column; max-height:min(94vh, 920px)}
+.scan-body{overflow:auto; padding:20px 24px 8px; flex:1 1 auto; min-height:0}
+.scan-foot{padding:12px 24px 16px; border-top:1px solid var(--line); background:var(--surface)}
+.scan-foot .dlg-actions{margin-top:0}
+#scanner .cam{width:min(100%, calc(40vh * var(--ar, 1.777)))}
+#scanner.big .cam{width:min(100%, calc(66vh * var(--ar, 1.777)))}
+#scanDebug canvas{max-width:360px}
+@media (prefers-reduced-motion: reduce){*{transition:none !important; scroll-behavior:auto !important}}
+/* ----- Thèmes par jeu ----- */
+body{
+  --accent:#5B3FD1; --accent-ink:#FFFFFF;
+  --hero-1:#1B1440; --hero-2:#43308F; --hero-ink:#F4F0FF; --hero-glow:#E7BD55;
+  --hero-chip:rgba(255,255,255,.14); --hero-btn:#E7BD55; --hero-btn-ink:#1B1440;
+  --stripe:linear-gradient(90deg,#43308F,#E7BD55);
+}
+body[data-game="pokemon"]{
+  --accent:#C42B22; --accent-ink:#FFFFFF;
+  --hero-1:#FFE27A; --hero-2:#FFB347; --hero-ink:#1A2550; --hero-glow:#2447C6;
+  --hero-chip:rgba(26,37,80,.12); --hero-btn:#1A2550; --hero-btn-ink:#FFFFFF;
+  --stripe:linear-gradient(90deg,#C42B22,#FFD23F,#2447C6);
+}
+@media (prefers-color-scheme: dark){
+  body{--accent:#B3A6FF; --accent-ink:#1A1240}
+  body[data-game="pokemon"]{--accent:#FF8478; --accent-ink:#3A0B08}
+}
+body::before{content:""; display:block; height:6px; background:var(--stripe)}
+.ico{width:1em; height:1em; fill:currentColor; vertical-align:-.13em; margin-right:6px}
+
+/* ----- Accueil illustré ----- */
+.hero{position:relative; overflow:hidden; display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:10px 24px; align-items:center;
+  padding:30px 30px 26px; border-radius:18px; color:var(--hero-ink); background:linear-gradient(135deg,var(--hero-1),var(--hero-2))}
+.hero-art{position:absolute; right:-70px; top:-80px; width:440px; color:var(--hero-glow); opacity:.38; pointer-events:none}
+.hero-art svg{display:block; width:100%; height:auto}
+.hero-copy{position:relative; z-index:1}
+.hero h2{margin:0 0 8px; font-size:clamp(1.7rem,3.4vw,2.5rem); line-height:1.08; letter-spacing:-.03em; font-weight:800}
+.hero p{margin:0 0 18px; max-width:44ch}
+.hero-actions{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.hero .primary{background:var(--hero-btn); color:var(--hero-btn-ink)}
+.hero .chip{background:var(--hero-chip); border-color:transparent; color:inherit}
+.hero .chip:hover{border-color:currentColor}
+.badges{display:flex; gap:8px; margin-top:20px}
+.badges span{width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:var(--hero-chip)}
+.badges svg{width:20px; height:20px; fill:currentColor}
+.badges .gem svg{width:34px; height:34px}
+.fan{position:relative; z-index:1; display:flex; align-items:center; justify-content:center; min-height:240px; padding:12px 0}
+.fan button{padding:0; border:0; background:none; cursor:pointer; margin-left:-34px; transform:rotate(var(--r,0deg)) translateY(var(--y,0px)); transition:transform .18s; animation:deal .45s backwards; animation-delay:calc(var(--i,0) * 70ms)}
+.fan button:first-child{margin-left:0}
+.fan button:hover,.fan button:focus-visible{transform:translateY(-14px) scale(1.05) rotate(0deg); z-index:3}
+.fan img,.fan svg{display:block; width:clamp(92px,13vw,148px); aspect-ratio:63/88; border-radius:8px; box-shadow:0 8px 20px rgba(0,0,0,.35)}
+.fan .back{margin-left:-34px; transform:rotate(var(--r,0deg)) translateY(var(--y,0px))}
+.fan .back:first-child{margin-left:0}
+@keyframes deal{from{opacity:0; transform:translateY(40px) rotate(0deg)}}
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr; padding:24px 20px}
+  .hero-art{width:320px; right:-90px; top:-90px}
+  .fan{min-height:200px}
+}
+@media (prefers-reduced-motion: reduce){.fan button{animation:none}}
+.nocard{display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center; padding:10px 0 4px}
+.nocard svg{width:130px; height:auto; color:var(--accent)}
+
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Aller au contenu</a>
+
+<header class="top">
+  <h1 class="brand">Cotation TCG</h1>
+  <nav class="bar" aria-label="Navigation principale">
+    <div class="seg" role="group" aria-label="Jeu">
+      <button type="button" data-game="mtg" aria-pressed="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z"/></svg>Magic</button>
+      <button type="button" data-game="pokemon" aria-pressed="false"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg>Pokémon</button>
+    </div>
+    <div class="seg" role="group" aria-label="Vue">
+      <button type="button" data-view="search" aria-pressed="true">Recherche</button>
+      <button type="button" data-view="binder" aria-pressed="false">Classeur<span id="binderCount" class="badge">0</span></button>
+    </div>
+    <button type="button" class="ghost" id="openSettings">Réglages</button>
+  </nav>
+</header>
+
+<main id="main">
+  <section id="viewSearch" aria-label="Recherche de cartes">
+    <form id="searchForm" class="search" role="search">
+      <label class="sr" for="q">Nom de la carte</label>
+      <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="Nom de la carte, par exemple Lightning Bolt">
+      <label class="sr" for="lang">Langue des cartes</label>
+      <select id="lang" hidden>
+        <option value="fr">Français</option>
+        <option value="en">English</option>
+        <option value="de">Deutsch</option>
+        <option value="es">Español</option>
+        <option value="it">Italiano</option>
+      </select>
+      <button class="primary" type="submit">Chercher</button>
+      <button class="secondary" type="button" id="scanBtn">Scanner une carte</button>
+    </form>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+    <div class="layout">
+      <div id="results"></div>
+      <aside id="detail" aria-label="Fiche de cote"></aside>
+    </div>
+  </section>
+
+  <section id="viewBinder" aria-label="Classeur" hidden>
+    <div id="binderBox"></div>
+  </section>
+</main>
+
+<footer>
+  <p>Prix indicatifs fournis par Scryfall (Magic) et TCGdex (Pokémon), à partir de Cardmarket et TCGplayer. Ils ne remplacent ni une expertise ni un grading professionnel.</p>
+  <p style="margin-top:8px">Projet de fan non officiel, sans lien avec Wizards of the Coast, Nintendo, Creatures Inc. ni GAME FREAK. Magic : The Gathering est une marque de Wizards of the Coast. Pokémon est une marque de Nintendo, Creatures Inc. et GAME FREAK. Les images de cartes viennent de Scryfall et de TCGdex ; les illustrations des cartes appartiennent à leurs auteurs et éditeurs. Les décors du site sont des créations originales.</p>
+</footer>
+
+<dialog id="settings" aria-labelledby="settingsTitle">
+  <form id="settingsForm">
+    <h2 id="settingsTitle">Réglages de la cote</h2>
+    <p class="muted" style="margin:0">Le prix de marché correspond à une carte en Near Mint. Chaque état applique un pourcentage de ce prix. Ces valeurs sont des repères courants : adaptez-les à votre marché.</p>
+    <div class="coefs" id="coefInputs"></div>
+    <div class="dlg-field">
+      <label for="refSelect" style="display:block; font-weight:600; margin-bottom:6px">Prix Pokémon utilisé comme base</label>
+      <select id="refSelect"></select>
+      <p class="note">S’applique aux nouvelles recherches et à l’actualisation du classeur.</p>
+    </div>
+    <div class="dlg-actions">
+      <button class="primary" type="submit">Enregistrer</button>
+      <button class="secondary" type="button" id="resetSettings">Valeurs par défaut</button>
+      <button class="secondary" type="button" id="closeSettings">Annuler</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="scanner" aria-labelledby="scanTitle">
+  <div class="scan-body">
+  <h2 id="scanTitle" style="margin:0 0 4px; font-size:1.4rem">Scanner une carte</h2>
+  <p class="muted" style="margin:0">Faites glisser le cadre sur la carte et réglez sa taille pour que la carte le remplisse, à plat et sans reflet. Le nom doit tomber dans le repère en pointillés du haut, le numéro dans la bande du bas.</p>
+  <div class="cam" id="cam"><video id="camVideo" playsinline muted></video><canvas id="photoView" hidden></canvas><div class="frame" id="camFrame"></div></div>
+  <div class="scan-opts">
+    <label id="camPick" hidden>Caméra <select id="camSelect"></select></label>
+    <label for="frameSize">Taille du cadre <input type="range" id="frameSize" min="15" max="100" value="88"></label>
+    <label><input type="checkbox" id="autoScan"> Lecture automatique</label>
+    <label><input type="checkbox" id="bigPreview"> Grand aperçu</label>
+  </div>
+  <p class="note" id="scanInfo"></p>
+  <p class="muted" id="scanMsg" role="status" aria-live="polite" style="min-height:1.6em; margin:8px 0 0"></p>
+  <div id="scanDebug" hidden>
+    <p class="note" id="scanRead" style="margin-bottom:0"></p>
+    <div id="scanBands"></div>
+  </div>
+  </div>
+  <div class="scan-foot">
+  <div class="dlg-actions">
+    <button class="primary" id="shootBtn" type="button" disabled>Lire la carte</button>
+    <button class="secondary" id="pickBtn" type="button">Choisir une photo</button>
+    <button class="secondary" id="rotBtn" type="button" hidden>Pivoter la photo</button>
+    <button class="secondary" id="camBackBtn" type="button" hidden>Revenir à la caméra</button>
+    <button class="secondary" id="scanClose" type="button">Fermer</button>
+  </div>
+  <input id="scanFile" type="file" accept="image/*" hidden>
+  <p class="note">La photo est lue dans votre navigateur et n’est jamais envoyée. Seul le nom lu est cherché sur Scryfall ou TCGdex.</p>
+  </div>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- Constantes et utilitaires ---------- */
+const PAGE = 60;
+const CONDITIONS = [
+  {k:'NM', name:'Near Mint',    fr:'Comme neuve',       def:100},
+  {k:'EX', name:'Excellent',    fr:'Très bon état',     def:90},
+  {k:'GD', name:'Good',         fr:'Bon état',          def:75},
+  {k:'LP', name:'Light Played', fr:'Légèrement jouée',  def:60},
+  {k:'PL', name:'Played',       fr:'Jouée',             def:40},
+  {k:'PO', name:'Poor',         fr:'Abîmée',            def:25},
+];
+const REFS = [
+  ['trend','Tendance'],
+  ['avg7','Moyenne sur 7 jours'],
+  ['avg30','Moyenne sur 30 jours'],
+  ['low','Prix le plus bas'],
+];
+const REF_LABEL = Object.fromEntries(REFS);
+const DEFAULTS = { coef: Object.fromEntries(CONDITIONS.map(c => [c.k, c.def])), ref: 'trend' };
+
+const fmtEUR = new Intl.NumberFormat('fr-FR', {style:'currency', currency:'EUR'});
+const fmtUSD = new Intl.NumberFormat('fr-FR', {style:'currency', currency:'USD'});
+const eur = v => v == null ? 'n/d' : fmtEUR.format(v);
+const usd = v => v == null ? 'n/d' : fmtUSD.format(v);
+const num = v => (v == null || v === '' || isNaN(+v)) ? null : +v;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const $ = (s, r = document) => r.querySelector(s);
+
+function h(tag, props, ...kids){
+  const el = document.createElement(tag);
+  if(props) for(const [k, v] of Object.entries(props)){
+    if(v == null || v === false) continue;
+    if(k === 'class') el.className = v;
+    else if(k === 'text') el.textContent = v;
+    else if(k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2), v);
+    else if(v === true) el.setAttribute(k, '');
+    else el.setAttribute(k, v);
+  }
+  for(const kid of kids.flat()){
+    if(kid == null || kid === false) continue;
+    el.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+  }
+  return el;
+}
+
+function load(key, fallback){
+  try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+  catch{ return fallback; }
+}
+function save(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch{} }
+
+let toastTimer;
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.textContent = ''; }, 2600);
+}
+
+/* ---------- Réglages et classeur (persistés) ---------- */
+const stored = load('cote.settings', {});
+let settings = {
+  ...DEFAULTS, ...stored,
+  coef: {...DEFAULTS.coef, ...(stored.coef || {})},
+};
+let binder = load('cote.binder', []);
+const persistBinder = () => save('cote.binder', binder);
+
+/* ---------- Accès aux API ---------- */
+async function getJSON(url){
+  const res = await fetch(url, {headers:{'Accept':'application/json'}});
+  if(res.status === 404){ const e = new Error('Introuvable'); e.status = 404; throw e; }
+  if(!res.ok) throw new Error('Erreur ' + res.status);
+  return res.json();
+}
+
+const RARITY_FR = {common:'Commune', uncommon:'Peu commune', rare:'Rare', mythic:'Mythique', special:'Spéciale', bonus:'Bonus'};
+
+function normMtg(c){
+  const face = c.image_uris ? c : ((c.card_faces && c.card_faces[0]) || {});
+  const img = face.image_uris || {};
+  const p = c.prices || {};
+  const fin = c.finishes || ['nonfoil'];
+  const finishes = [];
+  if(fin.includes('nonfoil')) finishes.push({key:'normal', label:'Normale', eur:{trend:num(p.eur)}, usd:num(p.usd)});
+  if(fin.includes('foil'))    finishes.push({key:'foil',   label:'Foil',    eur:{trend:num(p.eur_foil)}, usd:num(p.usd_foil)});
+  if(fin.includes('etched'))  finishes.push({key:'etched', label:'Etched',  eur:{trend:num(p.eur_etched)}, usd:num(p.usd_etched)});
+  const links = [];
+  if(c.scryfall_uri) links.push({href:c.scryfall_uri, label:'Voir sur Scryfall'});
+  if(c.purchase_uris && c.purchase_uris.cardmarket) links.push({href:c.purchase_uris.cardmarket, label:'Voir sur Cardmarket'});
+  return {
+    game:'mtg', id:c.id, lang:'en', name:c.printed_name || c.name,
+    setName:c.set_name, setCode:(c.set || '').toUpperCase(), number:c.collector_number,
+    rarity:RARITY_FR[c.rarity] || c.rarity, image:img.small || img.normal, imageLarge:img.large || img.normal,
+    finishes, links, needsDetail:false, updated:null,
+  };
+}
+
+function normPokeBrief(b, lang){
+  const setCode = b.id.includes('-') ? b.id.slice(0, b.id.lastIndexOf('-')) : '';
+  return {
+    game:'pokemon', id:b.id, lang, name:b.name, setName:'', setCode, number:b.localId,
+    rarity:'', image:b.image ? b.image + '/low.webp' : null, imageLarge:b.image ? b.image + '/high.webp' : null,
+    finishes:[], links:[], needsDetail:true, updated:null,
+  };
+}
+
+function normPoke(d, lang){
+  const cm = (d.pricing && d.pricing.cardmarket) || {};
+  const tp = (d.pricing && d.pricing.tcgplayer) || {};
+  const cmSet = s => ({low:num(cm['low' + s]), trend:num(cm['trend' + s]), avg1:num(cm['avg1' + s]), avg7:num(cm['avg7' + s]), avg30:num(cm['avg30' + s])});
+  const tpPrice = k => { const o = tp[k]; return o ? num(o.marketPrice != null ? o.marketPrice : o.midPrice) : null; };
+  const any = o => Object.values(o).some(v => v != null);
+  const finishes = [];
+  const n = cmSet(''), hs = cmSet('-holo');
+  const uN = tpPrice('normal');
+  const uH = tpPrice('holofoil') != null ? tpPrice('holofoil') : tpPrice('reverse-holofoil');
+  if(any(n) || uN != null)  finishes.push({key:'normal', label:'Normale',        eur:n,  usd:uN});
+  if(any(hs) || uH != null) finishes.push({key:'holo',   label:'Holo ou reverse', eur:hs, usd:uH});
+  const set = d.set || {};
+  const official = set.cardCount && set.cardCount.official;
+  const img = d.image;
+  return {
+    game:'pokemon', id:d.id, lang, name:d.name, setName:set.name || '', setCode:set.id || '',
+    number:d.localId ? (official ? d.localId + '/' + official : d.localId) : '',
+    rarity:d.rarity || '', image:img ? img + '/low.webp' : null, imageLarge:img ? img + '/high.webp' : null,
+    finishes,
+    links:[{href:'https://www.cardmarket.com/fr/Pokemon/Products/Search?searchString=' + encodeURIComponent(d.name), label:'Chercher sur Cardmarket'}],
+    needsDetail:false, updated:cm.updated || null,
+  };
+}
+
+async function fetchCard(game, id, lang){
+  if(game === 'mtg') return normMtg(await getJSON('https://api.scryfall.com/cards/' + encodeURIComponent(id)));
+  return normPoke(await getJSON(`https://api.tcgdex.net/v2/${lang}/cards/${encodeURIComponent(id)}`), lang);
+}
+
+/* ---------- Calcul de la cote ---------- */
+function basePrice(f){
+  if(!f) return null;
+  const e = f.eur || {};
+  const v = e[settings.ref];
+  if(v != null) return v;
+  for(const k of ['trend','avg7','avg30','low','avg1']) if(e[k] != null) return e[k];
+  return null;
+}
+const coefOf = k => (settings.coef[k] != null ? settings.coef[k] : 100) / 100;
+const bestFinish = c => c.finishes.find(f => basePrice(f) != null) || c.finishes[0] || null;
+function pickFinish(card, wanted){
+  const ok = card.finishes.find(f => f.key === wanted && basePrice(f) != null);
+  if(ok) return ok.key;
+  const b = bestFinish(card);
+  return b ? b.key : 'normal';
+}
+const unitValue = it => it.base == null ? null : it.base * coefOf(it.cond);
+
+/* ---------- État de l'interface ---------- */
+const state = {
+  game:'mtg', view:'search', lang:'fr',
+  results:null, total:0, shown:PAGE, query:'', scanNum:null,
+  selected:null, loading:false, error:'',
+  cond:'NM', finish:'normal', qty:1,
+};
+let selToken = 0;
+
+function setStatus(msg){ $('#status').textContent = msg || ''; }
+
+/* ---------- Recherche ---------- */
+async function runQuery(t, fuzzy){
+  if(state.game === 'mtg'){
+    let query = t, label = t;
+    if(fuzzy){
+      try{
+        const c = await getJSON('https://api.scryfall.com/cards/named?fuzzy=' + encodeURIComponent(t));
+        query = '!"' + c.name.replace(/"/g, '') + '"'; label = c.name;
+      }catch(e){ if(e.status !== 404) throw e; }
+    }
+    try{
+      const data = await getJSON('https://api.scryfall.com/cards/search?unique=prints&order=released&dir=desc&q=' + encodeURIComponent(query + ' game:paper'));
+      return {results:data.data.map(normMtg), total:data.total_cards != null ? data.total_cards : data.data.length, label};
+    }catch(e){
+      if(e.status === 404) return {results:[], total:0, label};
+      throw e;
+    }
+  }
+  const list = await getJSON(`https://api.tcgdex.net/v2/${state.lang}/cards?name=${encodeURIComponent(t)}`);
+  return {results:list.map(b => normPokeBrief(b, state.lang)), total:list.length, label:t};
+}
+
+const numMatch = (c, n) => n != null && c.number != null && parseInt(String(c.number), 10) === n;
+
+async function search(q, opts = {}){
+  q = (q || '').trim();
+  if(!q) return;
+  state.query = q; state.shown = PAGE; state.selected = null; state.results = [];
+  state.scanNum = opts.scanNum != null ? opts.scanNum : null;
+  selToken++;
+  renderResults(); renderDetail();
+  setStatus('Recherche en cours…');
+  let hits = [];
+  try{
+    let found = {results:[], total:0, label:q};
+    for(const t of [q, ...(opts.alts || [])]){
+      const r = await runQuery(t, !!opts.fuzzy && t === q);
+      if(r.results.length){ found = r; break; }
+    }
+    state.results = found.results; state.total = found.total;
+    if(opts.fuzzy && found.results.length) $('#q').value = found.label;
+    if(state.scanNum != null){
+      hits = state.results.filter(c => numMatch(c, state.scanNum));
+      state.results = [...hits, ...state.results.filter(c => !numMatch(c, state.scanNum))];
+    }
+    const n = state.total;
+    const unit = state.game === 'mtg' ? (n > 1 ? 'impressions' : 'impression') : (n > 1 ? 'cartes' : 'carte');
+    let msg = n ? `${n} ${unit} pour « ${found.label} ».` : '';
+    if(n && hits.length) msg += ` Les cartes portant le numéro lu (${state.scanNum}) sont en premier.`;
+    setStatus(msg);
+  }catch(e){
+    if(e.status === 404){ state.results = []; state.total = 0; setStatus(''); }
+    else{
+      state.results = null;
+      setStatus('Impossible de joindre le service de prix. Vérifiez votre connexion, puis relancez la recherche.');
+    }
+  }
+  renderResults();
+  if(hits.length === 1) selectCard(hits[0]);
+}
+
+/* ---------- Sélection d'une carte ---------- */
+async function selectCard(card){
+  const token = ++selToken;
+  state.selected = card; state.qty = 1; state.error = '';
+  state.finish = pickFinish(card, state.finish);
+  state.loading = card.needsDetail;
+  renderResults(); renderDetail();
+  if(matchMedia('(max-width: 900px)').matches) $('#detail').scrollIntoView({block:'start'});
+  if(!card.needsDetail) return;
+  try{
+    const full = await fetchCard(card.game, card.id, card.lang);
+    if(token !== selToken) return;
+    state.selected = full;
+    state.finish = pickFinish(full, state.finish);
+    const i = state.results ? state.results.findIndex(r => r.id === full.id) : -1;
+    if(i >= 0) state.results[i] = full;
+  }catch{
+    if(token !== selToken) return;
+    state.error = 'Impossible de charger les prix de cette carte. Réessayez dans un instant.';
+  }
+  state.loading = false;
+  renderResults(); renderDetail();
+}
+
+/* ---------- Décors originaux et vitrine ---------- */
+const GLYPHS = {
+  flame:'M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z',
+  drop:'M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z',
+  leaf:'M5 20C4 10 10 4 20 4c1 10-5 16-15 16zM6 19l9-9',
+  bolt:'M13 2L5 14h6l-1 8 9-13h-6z',
+  star:'M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z',
+};
+const f1 = n => n.toFixed(1);
+
+function arcaneSVG(){
+  let s = '<svg viewBox="0 0 400 400" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">';
+  s += '<circle cx="200" cy="200" r="190"/><circle cx="200" cy="200" r="176" stroke-dasharray="2 7"/><circle cx="200" cy="200" r="150"/>';
+  for(let i = 0; i < 48; i++){
+    const a = i * Math.PI / 24, r2 = i % 4 === 0 ? 158 : 166;
+    s += `<line x1="${f1(200 + 176 * Math.cos(a))}" y1="${f1(200 + 176 * Math.sin(a))}" x2="${f1(200 + r2 * Math.cos(a))}" y2="${f1(200 + r2 * Math.sin(a))}"/>`;
+  }
+  const star = [0, 1, 2, 3, 4].map(k => { const a = (-90 + 144 * k) * Math.PI / 180; return f1(200 + 150 * Math.cos(a)) + ',' + f1(200 + 150 * Math.sin(a)); }).join(' ');
+  s += `<polygon points="${star}"/><circle cx="200" cy="200" r="58"/><circle cx="200" cy="200" r="30" stroke-dasharray="3 5"/>`;
+  for(let i = 0; i < 8; i++){
+    const a = i * Math.PI / 4 + Math.PI / 8;
+    s += `<line x1="${f1(200 + 30 * Math.cos(a))}" y1="${f1(200 + 30 * Math.sin(a))}" x2="${f1(200 + 58 * Math.cos(a))}" y2="${f1(200 + 58 * Math.sin(a))}"/>`;
+  }
+  return s + '</svg>';
+}
+
+function burstSVG(){
+  const pts = [];
+  for(let i = 0; i < 32; i++){
+    const a = i * Math.PI / 16, r = i % 2 ? 125 : 192;
+    pts.push(f1(200 + r * Math.cos(a)) + ',' + f1(200 + r * Math.sin(a)));
+  }
+  const spark = (x, y, k) => `<path transform="translate(${x} ${y}) scale(${k})" d="M0-12Q0 0 12 0Q0 0 0 12Q0 0-12 0Q0 0 0-12Z" fill="currentColor"/>`;
+  return `<svg viewBox="0 0 400 400" aria-hidden="true"><polygon points="${pts.join(' ')}" fill="currentColor" opacity=".55"/>`
+    + '<circle cx="200" cy="200" r="104" fill="none" stroke="currentColor" stroke-width="4" stroke-dasharray="1 11" stroke-linecap="round"/>'
+    + '<circle cx="200" cy="200" r="70" fill="none" stroke="currentColor" stroke-width="2"/>'
+    + spark(70, 90, 2.2) + spark(335, 120, 1.6) + spark(310, 330, 2.6) + spark(95, 310, 1.4)
+    + '</svg>';
+}
+
+function cardBackSVG(){
+  return '<svg viewBox="0 0 126 176" class="back" fill="none" stroke="currentColor" aria-hidden="true">'
+    + '<rect x="1.5" y="1.5" width="123" height="173" rx="9" fill="var(--surface)" stroke-width="3"/>'
+    + '<rect x="10" y="10" width="106" height="156" rx="5" stroke-width="1.5"/>'
+    + '<path d="M63 40L93 88L63 136L33 88Z" stroke-width="2"/><circle cx="63" cy="88" r="15" stroke-width="2"/>'
+    + '<path d="M63 73V103M48 88H78" stroke-width="1.5"/></svg>';
+}
+
+function badgesEl(){
+  const box = h('div', {class:'badges', 'aria-hidden':'true'});
+  if(state.game === 'mtg'){
+    ['#F5EDD0', '#4DA3E8', '#5A5266', '#E5533D', '#4FA36A'].forEach((c, i) => {
+      const sp = h('span', {class:'gem'});
+      sp.innerHTML = `<svg viewBox="0 0 34 34"><defs><radialGradient id="gem${i}" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".85"/><stop offset=".45" stop-color="${c}"/><stop offset="1" stop-color="${c}" stop-opacity=".7"/></radialGradient></defs><circle cx="17" cy="17" r="14" fill="url(#gem${i})" stroke="rgba(255,255,255,.55)" stroke-width="1.5"/></svg>`;
+      box.append(sp);
+    });
+  }else{
+    ['flame', 'drop', 'leaf', 'bolt', 'star'].forEach(k => {
+      const sp = h('span');
+      sp.innerHTML = `<svg viewBox="0 0 24 24"><path d="${GLYPHS[k]}"/></svg>`;
+      box.append(sp);
+    });
+  }
+  return box;
+}
+
+const MTG_SHOW = ['Lightning Bolt', 'Serra Angel', 'Shivan Dragon', 'Counterspell', 'Llanowar Elves', 'Birds of Paradise', 'Black Lotus', 'Wrath of God', 'Giant Growth', 'Sol Ring'];
+const POKE_SHOW = ['2', '4', '10', '15', '58', '6', '8', '1'];
+const showcase = {};
+const showKey = () => state.game === 'mtg' ? 'mtg' : 'pokemon-' + state.lang;
+const shuffle = a => [...a].sort(() => Math.random() - 0.5);
+
+async function loadShowcase(){
+  const key = showKey();
+  if(showcase[key]) return;
+  showcase[key] = [];
+  try{
+    let items = [];
+    if(state.game === 'mtg'){
+      const q = '(' + shuffle(MTG_SHOW).slice(0, 5).map(n => `!"${n}"`).join(' or ') + ') game:paper';
+      const data = await getJSON('https://api.scryfall.com/cards/search?unique=cards&order=name&q=' + encodeURIComponent(q));
+      items = data.data.map(c => {
+        const f = c.image_uris ? c : ((c.card_faces && c.card_faces[0]) || {});
+        const im = f.image_uris || {};
+        return {name:c.printed_name || c.name, image:im.normal || im.small};
+      });
+    }else{
+      const set = await getJSON(`https://api.tcgdex.net/v2/${state.lang}/sets/base1`);
+      items = shuffle(POKE_SHOW).slice(0, 5)
+        .map(id => (set.cards || []).find(c => c.localId === id))
+        .filter(c => c && c.image)
+        .map(c => ({name:c.name, image:c.image + '/low.webp'}));
+    }
+    showcase[key] = items.filter(i => i.image);
+  }catch{ showcase[key] = []; }
+  if(state.results === null && showKey() === key && state.view === 'search') renderResults();
+}
+
+function heroEl(){
+  const g = state.game;
+  const items = showcase[showKey()] || [];
+  const mid = (Math.max(items.length, 3) - 1) / 2;
+  const fan = h('div', {class:'fan'});
+  if(items.length){
+    items.forEach((it, i) => fan.append(h('button', {type:'button', style:`--r:${f1((i - mid) * 7)}deg; --y:${f1(Math.abs(i - mid) * 6)}px; --i:${i}`, 'aria-label':'Chercher ' + it.name,
+      onclick:() => { $('#q').value = it.name; search(it.name); }}, h('img', {src:it.image, alt:it.name, loading:'lazy'}))));
+  }else{
+    fan.setAttribute('aria-hidden', 'true');
+    fan.innerHTML = [0, 1, 2].map(i => cardBackSVG().replace('class="back"', `class="back" style="--r:${(i - 1) * 8}deg; --y:${Math.abs(i - 1) * 8}px"`)).join('');
+  }
+  const art = h('div', {class:'hero-art', 'aria-hidden':'true'});
+  art.innerHTML = g === 'mtg' ? arcaneSVG() : burstSVG();
+  return h('div', {class:'hero'},
+    art,
+    h('div', {class:'hero-copy'},
+      h('h2', {text:g === 'mtg' ? 'Combien vaut votre carte Magic ?' : 'Combien vaut votre carte Pokémon ?'}),
+      h('p', {text:'Cherchez-la par son nom ou scannez-la avec la caméra. Choisissez son état pour obtenir sa cote.'}),
+      h('div', {class:'hero-actions'},
+        h('button', {type:'button', class:'primary', text:'Scanner une carte', onclick:openScanner}),
+        examples().map(ex => h('button', {type:'button', class:'chip', text:ex, onclick:() => { $('#q').value = ex; search(ex); }}))),
+      badgesEl()),
+    fan);
+}
+
+/* ---------- Rendu : résultats ---------- */
+function thumb(c){
+  if(!c.image) return h('div', {class:'thumb ph', text:c.name});
+  const img = h('img', {class:'thumb', src:c.image, alt:'', loading:'lazy'});
+  img.addEventListener('error', () => img.replaceWith(h('div', {class:'thumb ph', text:c.name})));
+  return img;
+}
+
+function examples(){
+  if(state.game === 'mtg') return ['Lightning Bolt', 'Black Lotus', 'Sol Ring'];
+  if(state.lang === 'fr') return ['Dracaufeu', 'Pikachu', 'Mewtwo'];
+  if(state.lang === 'en') return ['Charizard', 'Pikachu', 'Mewtwo'];
+  return ['Pikachu'];
+}
+
+function renderResults(){
+  const box = $('#results');
+  box.replaceChildren();
+  if(state.results === null){
+    box.append(heroEl());
+    return;
+  }
+  if(!state.results.length){
+    if(!state.query) return;
+    const hint = state.game === 'pokemon'
+      ? 'Aucune carte trouvée. Saisissez le nom dans la langue choisie (par exemple Dracaufeu en français, Charizard en anglais).'
+      : 'Aucune carte trouvée. Vérifiez l’orthographe ou cherchez le nom anglais de la carte.';
+    if(state.query) box.append(h('p', {class:'hint', text:hint}));
+    return;
+  }
+  const grid = h('div', {class:'grid'});
+  state.results.slice(0, state.shown).forEach(c => {
+    const f = bestFinish(c);
+    const sel = !!(state.selected && state.selected.id === c.id);
+    const setLine = [c.setName || c.setCode, c.number ? 'n° ' + c.number : ''].filter(Boolean).join(', ');
+    grid.append(h('button', {type:'button', class:'tile', 'aria-pressed':String(sel), onclick:() => selectCard(c)},
+      thumb(c),
+      h('span', {class:'t-name', text:c.name}),
+      h('span', {class:'t-set', text:setLine}),
+      numMatch(c, state.scanNum) ? h('span', {class:'t-match', text:'Numéro lu'}) : null,
+      f ? h('span', {class:'t-price', text:eur(basePrice(f))}) : null
+    ));
+  });
+  box.append(grid);
+  const rest = state.results.length - state.shown;
+  if(rest > 0) box.append(h('button', {type:'button', class:'secondary more', text:`Afficher plus (${rest} restantes)`, onclick:() => { state.shown += PAGE; renderResults(); }}));
+  if(state.game === 'mtg' && state.total > state.results.length && rest <= 0)
+    box.append(h('p', {class:'note', text:`Seules les ${state.results.length} impressions les plus récentes sont affichées. Précisez votre recherche pour affiner.`}));
+}
+
+/* ---------- Rendu : fiche de cote ---------- */
+function renderDetail(){
+  const el = $('#detail');
+  el.replaceChildren();
+  const c = state.selected;
+  if(!c){
+    const box = h('div', {class:'nocard'});
+    box.innerHTML = cardBackSVG();
+    box.append(h('p', {class:'hint', text:'Sélectionnez une carte pour afficher sa fiche de cote.'}));
+    el.append(box);
+    return;
+  }
+
+  const art = c.imageLarge || c.image;
+  if(art){
+    const img = h('img', {class:'art', src:art, alt:c.name});
+    img.addEventListener('error', () => { if(c.image && img.src !== c.image) img.src = c.image; });
+    el.append(img);
+  }
+  el.append(h('h2', {text:c.name}));
+  el.append(h('p', {class:'meta', text:[c.setName || c.setCode, c.number ? 'n° ' + c.number : '', c.rarity].filter(Boolean).join(', ')}));
+
+  if(state.loading){ el.append(h('p', {class:'hint', text:'Chargement des prix…'})); return; }
+  if(state.error){ el.append(h('p', {class:'hint', text:state.error})); return; }
+  if(!c.finishes.length){
+    el.append(h('p', {class:'hint', text:'Aucun prix de marché n’est disponible pour cette carte. Essayez une autre impression.'}));
+    appendLinks(el, c);
+    return;
+  }
+
+  const f = c.finishes.find(x => x.key === state.finish) || c.finishes[0];
+  const cond = CONDITIONS.find(x => x.k === state.cond) || CONDITIONS[0];
+
+  if(c.finishes.length > 1){
+    el.append(h('div', {class:'field'},
+      h('span', {class:'lbl', text:'Finition'}),
+      h('div', {class:'seg', role:'group', 'aria-label':'Finition'}, c.finishes.map(x =>
+        h('button', {type:'button', text:x.label, 'aria-pressed':String(x.key === f.key), onclick:() => { state.finish = x.key; renderDetail(); }})))
+    ));
+  }
+
+  el.append(h('div', {class:'field'},
+    h('span', {class:'lbl', text:'État de la carte'}),
+    h('div', {class:'seg', role:'group', 'aria-label':'État de la carte'}, CONDITIONS.map(x =>
+      h('button', {type:'button', text:x.k, title:`${x.name}, ${x.fr}`, 'aria-pressed':String(x.k === cond.k), onclick:() => { state.cond = x.k; renderDetail(); }}))),
+    h('p', {class:'cond-note', text:`${cond.fr} (${cond.name}), soit ${settings.coef[cond.k]} % du prix de base.`})
+  ));
+
+  el.append(h('div', {class:'field'},
+    h('label', {class:'lbl', for:'qty', text:'Quantité'}),
+    h('input', {id:'qty', type:'number', min:'1', max:'999', value:String(state.qty), onchange:e => {
+      state.qty = Math.max(1, Math.min(999, parseInt(e.target.value, 10) || 1)); renderDetail();
+    }})
+  ));
+
+  const base = basePrice(f);
+  const unit = base == null ? null : base * coefOf(cond.k);
+  const tag = h('div', {class:'tag'}, h('span', {class:'lbl', text:'Cote estimée'}), h('span', {class:'amount', text:eur(unit)}));
+  if(base == null){
+    tag.append(h('span', {class:'sub', text:'Aucun prix disponible pour cette finition. Essayez-en une autre.'}));
+  }else{
+    const sub = h('span', {class:'sub'}, `Base ${eur(base)} × ${settings.coef[cond.k]} % (${cond.k})`);
+    if(state.qty > 1) sub.append(h('br'), `Total pour ${state.qty} cartes : `, h('strong', {text:eur(unit * state.qty)}));
+    tag.append(sub);
+  }
+  el.append(tag);
+
+  const dl = h('dl', {class:'refs'});
+  if(c.game === 'pokemon'){
+    REFS.forEach(([k, label]) => {
+      if(f.eur[k] == null) return;
+      dl.append(h('dt', {text:label + ' (Cardmarket)'}), h('dd', {class:k === settings.ref ? 'used' : '', text:eur(f.eur[k])}));
+    });
+  }else{
+    dl.append(h('dt', {text:'Prix Cardmarket (via Scryfall)'}), h('dd', {class:'used', text:eur(f.eur.trend)}));
+  }
+  if(f.usd != null) dl.append(h('dt', {text:'Prix TCGplayer (référence)'}), h('dd', {text:usd(f.usd)}));
+  el.append(dl);
+  if(c.updated){
+    const d = new Date(c.updated);
+    if(!isNaN(d)) el.append(h('p', {class:'note', text:'Prix Cardmarket du ' + d.toLocaleDateString('fr-FR') + '.'}));
+  }
+
+  const actions = h('div', {class:'actions'},
+    h('button', {type:'button', class:'primary', text:'Ajouter au classeur', onclick:() => addToBinder(c, f, cond.k, state.qty)}));
+  el.append(actions);
+  appendLinks(el, c);
+}
+
+function appendLinks(el, c){
+  if(!c.links || !c.links.length) return;
+  el.append(h('div', {class:'actions'}, c.links.map(l => h('a', {href:l.href, target:'_blank', rel:'noopener noreferrer', text:l.label}))));
+}
+
+/* ---------- Classeur ---------- */
+function addToBinder(card, f, cond, qty){
+  const base = basePrice(f);
+  const same = binder.find(i => i.game === card.game && i.id === card.id && i.lang === card.lang && i.finish === f.key && i.cond === cond);
+  if(same){ same.qty = Math.min(999, same.qty + qty); same.base = base != null ? base : same.base; same.ts = Date.now(); }
+  else binder.push({
+    uid:Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+    game:card.game, id:card.id, lang:card.lang, name:card.name, setName:card.setName || card.setCode, number:card.number,
+    image:card.image, finish:f.key, finishLabel:f.label, cond, qty, base, ts:Date.now(),
+  });
+  persistBinder(); renderBinder();
+  toast(`${card.name} ajoutée au classeur`);
+}
+
+function setBinderStatus(msg){ const s = $('#binderStatus'); if(s) s.textContent = msg || ''; }
+
+function renderBinder(){
+  const box = $('#binderBox');
+  box.replaceChildren();
+  $('#binderCount').textContent = String(binder.reduce((s, i) => s + i.qty, 0));
+  if(!binder.length){
+    box.append(h('div', {class:'empty'},
+      h('h2', {text:'Votre classeur est vide'}),
+      h('p', {text:'Recherchez une carte, choisissez son état, puis ajoutez-la au classeur pour suivre la valeur totale de votre collection.'}),
+      h('button', {type:'button', class:'primary', text:'Chercher une carte', onclick:() => setView('search')})
+    ));
+    return;
+  }
+  const total = binder.reduce((s, i) => { const u = unitValue(i); return s + (u == null ? 0 : u * i.qty); }, 0);
+  const count = binder.reduce((s, i) => s + i.qty, 0);
+  box.append(h('div', {class:'tag total'},
+    h('span', {class:'lbl', text:'Valeur estimée du classeur'}),
+    h('span', {class:'amount', text:eur(total)}),
+    h('span', {class:'sub', text:`${count} carte${count > 1 ? 's' : ''} sur ${binder.length} ligne${binder.length > 1 ? 's' : ''}`})
+  ));
+  box.append(h('div', {class:'toolbar'},
+    h('button', {type:'button', class:'secondary', id:'refreshBtn', text:'Actualiser les prix', onclick:refreshBinder}),
+    h('button', {type:'button', class:'secondary', text:'Exporter en CSV', onclick:exportCSV}),
+    h('button', {type:'button', class:'secondary danger', text:'Vider le classeur', onclick:() => {
+      if(confirm('Supprimer toutes les cartes du classeur ?')){ binder = []; persistBinder(); renderBinder(); }
+    }})
+  ));
+  box.append(h('p', {id:'binderStatus', class:'status', role:'status', 'aria-live':'polite'}));
+
+  const list = h('ul', {class:'list'});
+  binder.forEach(it => {
+    const u = unitValue(it);
+    const thumbEl = it.image ? h('img', {src:it.image, alt:'', loading:'lazy'}) : h('div', {class:'ph'});
+    const date = it.ts ? new Date(it.ts).toLocaleDateString('fr-FR') : '';
+    const sel = h('select', {'aria-label':'État de ' + it.name, onchange:e => { it.cond = e.target.value; persistBinder(); renderBinder(); }},
+      CONDITIONS.map(c => h('option', {value:c.k, selected:c.k === it.cond, text:`${c.k}, ${c.fr}`})));
+    const qty = h('input', {type:'number', min:'1', max:'999', value:String(it.qty), 'aria-label':'Quantité de ' + it.name, onchange:e => {
+      it.qty = Math.max(1, Math.min(999, parseInt(e.target.value, 10) || 1)); persistBinder(); renderBinder();
+    }});
+    list.append(h('li', {class:'row'},
+      thumbEl,
+      h('div', {class:'info'},
+        h('strong', {text:it.name}),
+        h('span', {text:[it.setName, it.number ? 'n° ' + it.number : '', it.finishLabel].filter(Boolean).join(', ')}),
+        h('span', {text:it.base == null ? 'Prix indisponible' : `Prix de base ${eur(it.base)}${date ? ', relevé le ' + date : ''}`})
+      ),
+      h('div', {class:'controls'}, sel, qty,
+        h('span', {class:'value', text:u == null ? 'n/d' : eur(u * it.qty)}),
+        h('button', {type:'button', class:'ghost', text:'Retirer', 'aria-label':'Retirer ' + it.name + ' du classeur', onclick:() => {
+          binder = binder.filter(x => x.uid !== it.uid); persistBinder(); renderBinder();
+        }}))
+    ));
+  });
+  box.append(list);
+}
+
+async function refreshBinder(){
+  if(!binder.length) return;
+  const btn = $('#refreshBtn');
+  btn.disabled = true;
+  const cache = new Map();
+  let done = 0, failed = 0;
+  for(const it of binder){
+    const key = `${it.game}|${it.id}|${it.lang}`;
+    try{
+      let card = cache.get(key);
+      if(!card){ card = await fetchCard(it.game, it.id, it.lang); cache.set(key, card); await sleep(120); }
+      const f = card.finishes.find(x => x.key === it.finish) || card.finishes[0];
+      const b = f ? basePrice(f) : null;
+      if(b != null){ it.base = b; it.ts = Date.now(); }
+    }catch{ failed++; }
+    done++;
+    setBinderStatus(`Actualisation en cours : ${done} sur ${binder.length}…`);
+  }
+  persistBinder(); renderBinder();
+  setBinderStatus(failed ? `Actualisation terminée, ${failed} carte${failed > 1 ? 's' : ''} non mise${failed > 1 ? 's' : ''} à jour.` : 'Tous les prix sont à jour.');
+}
+
+function exportCSV(){
+  const head = ['Jeu','Nom','Édition','Numéro','Finition','État','Quantité','Prix de base (EUR)','Cote unitaire (EUR)','Valeur (EUR)','Prix relevé le'];
+  const f2 = v => v == null ? '' : v.toFixed(2).replace('.', ',');
+  const rows = binder.map(it => {
+    const u = unitValue(it);
+    return [it.game === 'mtg' ? 'Magic' : 'Pokémon', it.name, it.setName || '', it.number || '', it.finishLabel, it.cond, it.qty,
+      f2(it.base), f2(u), f2(u == null ? null : u * it.qty), it.ts ? new Date(it.ts).toLocaleDateString('fr-FR') : ''];
+  });
+  const esc = v => { const s = String(v); return /[";\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const csv = '\ufeff' + [head, ...rows].map(r => r.map(esc).join(';')).join('\r\n');
+  const url = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'}));
+  const a = h('a', {href:url, download:'classeur-cotes-' + new Date().toISOString().slice(0, 10) + '.csv'});
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* ---------- Scanner (lecture par OCR dans le navigateur) ---------- */
+/* PURE:start */
+const POKE_NOISE = new Set(['basic','base','stage','stade','niv','lv','pokémon','pokemon','hp','pv','ex','gx','v','vmax','vstar','vunion','tera','mega','méga']);
+function cleanName(raw, game){
+  const lines = String(raw || '').split(/\r?\n/)
+    .map(l => l.replace(/[^\p{L}'’\- ,]/gu, ' ').replace(/\s+/g, ' ').trim())
+    .filter(l => l.replace(/[^\p{L}]/gu, '').length >= 3);
+  if(!lines.length) return '';
+  let tokens = lines.sort((a, b) => b.length - a.length)[0].split(' ');
+  tokens = tokens.filter(t => t.replace(/[^\p{L}]/gu, '').length >= 2);
+  if(game === 'pokemon') tokens = tokens.filter(t => !POKE_NOISE.has(t.toLowerCase().replace(/[^\p{L}]/gu, '')));
+  if(game === 'pokemon') while(tokens.length > 1 && tokens[tokens.length - 1].replace(/[^\p{L}]/gu, '').length <= 2) tokens.pop(); // reste du logo « ex » mal lu
+  return tokens.join(' ').replace(/^[\s,\-']+|[\s,\-']+$/g, '').trim();
+}
+function longestWord(s){
+  return String(s || '').split(/[\s,]+/).reduce((a, b) => b.length > a.length ? b : a, '');
+}
+function parseNumber(raw){
+  const lines = String(raw || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  for(const l of lines){
+    const m = l.match(/(\d{1,3})\s*[\/|\\]\s*(\d{2,3})/);
+    if(m) return {num:parseInt(m[1], 10), of:parseInt(m[2], 10)};
+  }
+  for(const l of lines){
+    const m = l.match(/^0*(\d{1,4})(?:\s*\/\s*\d{1,4})?(?:\s+[CURMSTL])?$/i);
+    if(m) return {num:parseInt(m[1], 10), of:null};
+  }
+  return null;
+}
+function pokeVariants(name){
+  const out = [];
+  const add = v => {
+    v = String(v || '').trim();
+    if(v.length >= 4 && v.toLowerCase() !== String(name).toLowerCase() && !out.some(o => o.toLowerCase() === v.toLowerCase())) out.push(v);
+  };
+  const unglued = String(name).replace(/(vstar|vmax|ex|gx|v)$/i, '');
+  add(unglued);
+  add(longestWord(name));
+  add(longestWord(unglued).slice(1)); // sans la 1re lettre : tolère un accent mal lu (É lu E)
+  return out;
+}
+/* PURE:end */
+
+const OCR_LANG = {fr:'fra', en:'eng', de:'deu', es:'spa', it:'ita'};
+/* Zones du nom (x, y, largeur, hauteur en fraction de la carte). Serrées sur une seule ligne :
+   la zone Pokémon saute l'étiquette de stade (à gauche) et les PV (à droite). */
+const NAME_BANDS = {
+  pokemon:[[0.17, 0.030, 0.52, 0.075], [0.17, 0.020, 0.52, 0.095], [0.10, 0.030, 0.62, 0.075]],
+  mtg:    [[0.03, 0.030, 0.77, 0.075], [0.03, 0.020, 0.77, 0.100], [0.03, 0.040, 0.77, 0.070]],
+};
+/* Facteur d'échelle : on ramène la carte à environ 950 px de haut, taille où la lecture est la plus fiable. */
+const scaleFor = c => Math.max(0.4, Math.min(4, 950 / c.height));
+const scanDlg = $('#scanner');
+const camVideo = $('#camVideo');
+const camEl = $('#cam');
+let camStream = null, tessLoad = null, scanBusy = false, autoOn = false, lastRead = '';
+let photoSrc = null, center = {x:0.5, y:0.5};
+let cached = {lang:null, worker:null};
+const frameFrac = () => (parseInt($('#frameSize').value, 10) || 88) / 100;
+const canRead = () => !!camStream || !!photoSrc;
+const srcDims = () => photoSrc ? {w:photoSrc.width, h:photoSrc.height} : {w:camVideo.videoWidth, h:camVideo.videoHeight};
+
+function setScanMsg(m){ $('#scanMsg').textContent = m || ''; }
+
+function loadTesseract(){
+  if(window.Tesseract) return Promise.resolve();
+  if(!tessLoad) tessLoad = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+    s.onload = res;
+    s.onerror = () => { tessLoad = null; rej(new Error('Chargement du moteur impossible')); };
+    document.head.append(s);
+  });
+  return tessLoad;
+}
+
+async function dropWorker(){
+  const w = cached.worker;
+  cached = {lang:null, worker:null};
+  if(w){ try{ await w.terminate(); }catch{} }
+}
+async function getWorker(lang){
+  if(cached.worker && cached.lang === lang) return cached.worker;
+  await dropWorker();
+  const w = await window.Tesseract.createWorker(lang, 1, {logger:m => {
+    if(m.status && m.status.includes('loading')) setScanMsg('Téléchargement du moteur de lecture (première utilisation seulement)…');
+  }});
+  cached = {lang, worker:w};
+  return w;
+}
+
+function stopCamera(){
+  if(camStream) camStream.getTracks().forEach(t => t.stop());
+  camStream = null; camVideo.srcObject = null;
+}
+
+/* Place le cadre (taille réglable, position glissable) sur la source, caméra ou photo. */
+function layoutFrame(){
+  const {w:vw, h:vh} = srcDims();
+  if(!vw || !vh) return {cw:0, ch:0, sx:0, sy:0};
+  let ch = vh * frameFrac(), cw = ch * 63 / 88;
+  const capW = photoSrc ? 1 : 0.94;
+  if(cw > vw * capW){ cw = vw * capW; ch = cw * 88 / 63; }
+  const sx = Math.max(0, Math.min(vw - cw, center.x * vw - cw / 2));
+  const sy = Math.max(0, Math.min(vh - ch, center.y * vh - ch / 2));
+  camEl.style.setProperty('--ar', (vw / vh).toFixed(4));
+  const f = $('#camFrame');
+  f.style.width = (cw / vw * 100) + '%';
+  f.style.height = (ch / vh * 100) + '%';
+  f.style.left = ((sx + cw / 2) / vw * 100) + '%';
+  f.style.top = ((sy + ch / 2) / vh * 100) + '%';
+  return {cw, ch, sx, sy};
+}
+
+function updateInfo(){
+  const {w, h} = srcDims();
+  if(!w){ $('#scanInfo').textContent = ''; return; }
+  const g = layoutFrame();
+  let t = `${photoSrc ? 'Photo' : 'Caméra'} : ${w}×${h}. La carte est lue sur ${Math.round(g.cw)} px de large.`;
+  if(g.cw < 450) t += photoSrc
+    ? ' Image trop petite : utilisez une photo plus proche ou de meilleure qualité.'
+    : ' Résolution faible : rapprochez la carte pour qu’elle remplisse le cadre, ou réduisez la taille du cadre.';
+  $('#scanInfo').textContent = t;
+}
+
+async function startCamera(deviceId){
+  stopCamera();
+  const video = {width:{ideal:1920}, height:{ideal:1080}};
+  if(deviceId) video.deviceId = {exact:deviceId}; else video.facingMode = {ideal:'environment'};
+  camStream = await navigator.mediaDevices.getUserMedia({video, audio:false});
+  camVideo.srcObject = camStream;
+  await camVideo.play();
+  const track = camStream.getVideoTracks()[0];
+  try{ await track.applyConstraints({advanced:[{focusMode:'continuous'}]}); }catch{}
+  if(!photoSrc) updateInfo();
+  try{
+    const devs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'videoinput');
+    const cur = track.getSettings ? track.getSettings().deviceId : '';
+    $('#camSelect').replaceChildren(...devs.map((d, i) => h('option', {value:d.deviceId, selected:d.deviceId === cur, text:d.label || 'Caméra ' + (i + 1)})));
+    $('#camPick').hidden = devs.length < 2;
+  }catch{}
+}
+
+/* ----- Mode photo ----- */
+function drawPreview(){
+  const pv = $('#photoView');
+  const k = Math.min(1, 1400 / Math.max(photoSrc.width, photoSrc.height));
+  pv.width = Math.round(photoSrc.width * k); pv.height = Math.round(photoSrc.height * k);
+  pv.getContext('2d').drawImage(photoSrc, 0, 0, pv.width, pv.height);
+}
+let savedFrac = null;
+function enterPhoto(canvas){
+  const fs = $('#frameSize');
+  if(!photoSrc) savedFrac = fs.value;
+  photoSrc = canvas; center = {x:0.5, y:0.5};
+  const wholeCard = Math.abs(canvas.width / canvas.height - 63 / 88) < 0.05;
+  fs.value = wholeCard ? '100' : '60';
+  $('#autoScan').checked = false;
+  camVideo.hidden = true; $('#photoView').hidden = false;
+  $('#rotBtn').hidden = false; $('#camBackBtn').hidden = false;
+  drawPreview(); updateInfo();
+  $('#shootBtn').disabled = false;
+  setScanMsg(wholeCard
+    ? 'L’image semble être une carte entière : le cadre la couvre. Cliquez sur « Lire la carte ».'
+    : 'Faites glisser le cadre sur la carte et réglez sa taille pour que la carte le remplisse, puis cliquez sur « Lire la carte ».');
+}
+function resetPhotoUI(){
+  if(savedFrac != null){ $('#frameSize').value = savedFrac; savedFrac = null; }
+  photoSrc = null; center = {x:0.5, y:0.5};
+  camVideo.hidden = false; $('#photoView').hidden = true;
+  $('#rotBtn').hidden = true; $('#camBackBtn').hidden = true;
+}
+function exitPhoto(){
+  resetPhotoUI();
+  if(camStream){ updateInfo(); $('#shootBtn').disabled = false; setScanMsg('Caméra active.'); return; }
+  $('#shootBtn').disabled = true; $('#scanInfo').textContent = '';
+  startCamera().then(() => { $('#shootBtn').disabled = false; setScanMsg('Caméra active.'); })
+    .catch(() => setScanMsg('Caméra indisponible. Choisissez une photo de la carte.'));
+}
+function rotatePhoto(){
+  if(!photoSrc) return;
+  const c = document.createElement('canvas');
+  c.width = photoSrc.height; c.height = photoSrc.width;
+  const g = c.getContext('2d');
+  g.translate(c.width, 0); g.rotate(Math.PI / 2); g.drawImage(photoSrc, 0, 0);
+  photoSrc = c; center = {x:0.5, y:0.5};
+  drawPreview(); updateInfo();
+}
+async function canvasFromFile(file){
+  let bmp;
+  try{ bmp = await createImageBitmap(file, {imageOrientation:'from-image'}); }
+  catch{ bmp = await createImageBitmap(file); }
+  const k = Math.min(1, 3000 / Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas');
+  c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+  return c;
+}
+
+async function openScanner(){
+  setScanMsg(''); $('#scanInfo').textContent = ''; $('#scanDebug').hidden = true;
+  resetPhotoUI();
+  $('#shootBtn').disabled = true;
+  scanDlg.showModal();
+  try{
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('no camera api');
+    await startCamera();
+    $('#shootBtn').disabled = false;
+    setScanMsg('Caméra prête. Appuyez sur « Lire la carte » ou activez la lecture automatique.');
+  }catch{
+    setScanMsg('Caméra indisponible (autorisation refusée ou page non sécurisée). Choisissez plutôt une photo de la carte.');
+  }
+}
+
+function captureCurrent(){
+  const {cw, ch, sx, sy} = layoutFrame();
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(cw)); c.height = Math.max(1, Math.round(ch));
+  c.getContext('2d').drawImage(photoSrc || camVideo, sx, sy, cw, ch, 0, 0, c.width, c.height);
+  return c;
+}
+
+/* Recadre une bande de la carte, l'agrandit, étire le contraste et inverse si le fond est sombre. */
+function prepBand(src, fx, fy, fw, fh, k){
+  const sx = Math.round(src.width * fx), sy = Math.round(src.height * fy);
+  const sw = Math.round(src.width * fw), sh = Math.round(src.height * fh);
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(sw * k)); c.height = Math.max(1, Math.round(sh * k));
+  const g = c.getContext('2d', {willReadFrequently:true});
+  g.imageSmoothingQuality = 'high';
+  g.drawImage(src, sx, sy, sw, sh, 0, 0, c.width, c.height);
+  const im = g.getImageData(0, 0, c.width, c.height), d = im.data, n = c.width * c.height;
+  const gray = new Uint8Array(n), hist = new Uint32Array(256);
+  let sum = 0;
+  for(let i = 0; i < n; i++){
+    const v = (0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]) | 0;
+    gray[i] = v; hist[v]++; sum += v;
+  }
+  let acc = 0, lo = 0, hi = 255;
+  for(let v = 0; v < 256; v++){ acc += hist[v]; if(acc >= n * 0.02){ lo = v; break; } }
+  acc = 0;
+  for(let v = 255; v >= 0; v--){ acc += hist[v]; if(acc >= n * 0.02){ hi = v; break; } }
+  const span = Math.max(1, hi - lo);
+  const invert = ((sum / n) - lo) / span < 0.45;
+  for(let i = 0; i < n; i++){
+    let v = Math.max(0, Math.min(255, ((gray[i] - lo) * 255 / span) | 0));
+    if(invert) v = 255 - v;
+    d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = v; d[i * 4 + 3] = 255;
+  }
+  g.putImageData(im, 0, 0);
+  return c;
+}
+
+/* Lit le nom (3 cadrages, on garde le plus fiable) puis le numéro. */
+async function readCard(card){
+  const lang = state.game === 'mtg' ? 'eng+fra' : (OCR_LANG[state.lang] || 'eng');
+  const worker = await getWorker(lang);
+  await worker.setParameters({tessedit_pageseg_mode:'7'});
+  let best = {name:'', conf:-1, canvas:null}, firstCv = null;
+  const k = scaleFor(card);
+  for(const b of NAME_BANDS[state.game] || NAME_BANDS.mtg){
+    const cv = prepBand(card, b[0], b[1], b[2], b[3], k);
+    if(!firstCv) firstCv = cv;
+    const {data} = await worker.recognize(cv);
+    const nm = cleanName(data.text, state.game);
+    if(nm.length >= 3 && data.confidence > best.conf) best = {name:nm, conf:data.confidence, canvas:cv};
+  }
+  await worker.setParameters({tessedit_pageseg_mode:'6'});
+  const botCv = prepBand(card, 0, 0.90, 1, 0.10, Math.max(k, 2.5));
+  const bot = (await worker.recognize(botCv)).data.text;
+  return {name:best.name, conf:Math.max(best.conf, 0), nameCanvas:best.canvas || firstCv, botCanvas:botCv, parsed:parseNumber(bot)};
+}
+
+function showDebug(r){
+  $('#scanDebug').hidden = false;
+  $('#scanRead').textContent = r.name
+    ? `Nom lu : « ${r.name} » (confiance ${Math.round(r.conf)} %). Numéro lu : ${r.parsed ? r.parsed.num : 'aucun'}.`
+    : 'Aucun nom lisible dans le repère du haut. Les bandes ci-dessous montrent ce que l’appli analyse : le nom doit y être net et entier.';
+  $('#scanBands').replaceChildren(...[r.nameCanvas, r.botCanvas].filter(Boolean));
+}
+
+async function runScan(card, auto = false){
+  if(scanBusy) return false;
+  scanBusy = true;
+  $('#shootBtn').disabled = true; $('#pickBtn').disabled = true;
+  try{
+    if(!auto) setScanMsg('Lecture en cours…');
+    await loadTesseract();
+    const r = await readCard(card);
+    showDebug(r);
+    if(r.name.length < 3){
+      lastRead = '';
+      setScanMsg(auto ? 'Aucun nom lisible pour l’instant. Ajustez la carte dans le cadre.' : 'Nom illisible. Vérifiez que la carte remplit bien le cadre, que le nom tombe dans le repère du haut, puis réessayez.');
+      return false;
+    }
+    if(auto && r.name.toLowerCase() !== lastRead){
+      lastRead = r.name.toLowerCase();
+      setScanMsg(`Lecture : « ${r.name} ». Gardez la carte immobile pour confirmer…`);
+      return false;
+    }
+    const alts = [];
+    if(state.game === 'pokemon'){
+      alts.push(...pokeVariants(r.name));
+    }else{
+      alts.push('lang:any "' + r.name.replace(/"/g, '') + '"');
+    }
+    $('#q').value = r.name;
+    await search(r.name, {fuzzy:state.game === 'mtg', alts, scanNum:r.parsed ? r.parsed.num : null});
+    if(state.results && state.results.length){
+      scanDlg.close();
+      toast(`Lu : « ${r.name} »`);
+      return true;
+    }
+    lastRead = '';
+    setScanMsg(`« ${r.name} » ne correspond à aucune carte. Vérifiez le nom, la lumière et le cadrage.`);
+    return false;
+  }catch{
+    setScanMsg('La lecture a échoué. Vérifiez votre connexion (le moteur se télécharge au premier usage), puis réessayez.');
+    return false;
+  }finally{
+    scanBusy = false;
+    $('#shootBtn').disabled = !canRead(); $('#pickBtn').disabled = false;
+  }
+}
+
+async function autoLoop(){
+  if(autoOn) return;
+  autoOn = true; lastRead = '';
+  while($('#autoScan').checked && scanDlg.open && camStream && !photoSrc){
+    if(!scanBusy){
+      const done = await runScan(captureCurrent(), true);
+      if(done) break;
+    }
+    await sleep(1200);
+  }
+  autoOn = false;
+}
+
+/* Glisser pour placer le cadre (souris, doigt ou stylet) */
+let dragging = false;
+const moveFrame = e => {
+  const r = camEl.getBoundingClientRect();
+  if(!r.width || !r.height) return;
+  center = {x:(e.clientX - r.left) / r.width, y:(e.clientY - r.top) / r.height};
+  layoutFrame();
+};
+camEl.addEventListener('pointerdown', e => {
+  dragging = true;
+  try{ camEl.setPointerCapture(e.pointerId); }catch{}
+  moveFrame(e);
+});
+camEl.addEventListener('pointermove', e => { if(dragging) moveFrame(e); });
+['pointerup', 'pointercancel'].forEach(t => camEl.addEventListener(t, () => { dragging = false; }));
+
+$('#scanBtn').addEventListener('click', openScanner);
+$('#scanClose').addEventListener('click', () => scanDlg.close());
+scanDlg.addEventListener('close', () => { stopCamera(); resetPhotoUI(); $('#autoScan').checked = false; dropWorker(); });
+$('#shootBtn').addEventListener('click', () => { if(canRead()) runScan(captureCurrent()); });
+$('#pickBtn').addEventListener('click', () => $('#scanFile').click());
+$('#rotBtn').addEventListener('click', rotatePhoto);
+$('#bigPreview').addEventListener('change', e => scanDlg.classList.toggle('big', e.target.checked));
+$('#camBackBtn').addEventListener('click', exitPhoto);
+$('#frameSize').addEventListener('input', updateInfo);
+$('#camSelect').addEventListener('change', e => {
+  startCamera(e.target.value).catch(() => setScanMsg('Impossible d’ouvrir cette caméra. Essayez-en une autre.'));
+});
+$('#autoScan').addEventListener('change', e => {
+  if(e.target.checked && photoSrc){ e.target.checked = false; setScanMsg('La lecture automatique fonctionne avec la caméra, pas avec une photo.'); }
+  else if(e.target.checked && camStream){ setScanMsg('Lecture automatique : gardez la carte immobile dans le cadre.'); autoLoop(); }
+  else if(e.target.checked){ e.target.checked = false; setScanMsg('Activez d’abord la caméra.'); }
+  else setScanMsg('Lecture automatique désactivée.');
+});
+$('#scanFile').addEventListener('change', async e => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if(!file) return;
+  try{ enterPhoto(await canvasFromFile(file)); }
+  catch{ setScanMsg('Impossible de lire cette image. Essayez un fichier JPEG ou PNG.'); }
+});
+
+/* ---------- Réglages ---------- */
+function buildSettings(){
+  const box = $('#coefInputs');
+  box.replaceChildren();
+  CONDITIONS.forEach(c => {
+    box.append(
+      h('label', {for:'coef-' + c.k, text:`${c.k}, ${c.fr}`}),
+      h('input', {id:'coef-' + c.k, type:'number', min:'1', max:'150', step:'1', value:String(settings.coef[c.k])})
+    );
+  });
+  const ref = $('#refSelect');
+  ref.replaceChildren(...REFS.map(([k, label]) => h('option', {value:k, selected:k === settings.ref, text:label})));
+}
+
+/* ---------- Navigation ---------- */
+function setGame(g){
+  document.body.dataset.game = g;
+  state.game = g; state.results = null; state.selected = null; state.query = ''; state.loading = false; state.error = '';
+  selToken++;
+  document.querySelectorAll('[data-game]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.game === g)));
+  $('#lang').hidden = g !== 'pokemon';
+  $('#q').placeholder = g === 'mtg' ? 'Nom de la carte, par exemple Lightning Bolt' : 'Nom du Pokémon, par exemple Dracaufeu';
+  $('#q').value = '';
+  setStatus('');
+  renderResults(); renderDetail();
+  loadShowcase();
+}
+
+function setView(v){
+  state.view = v;
+  document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === v)));
+  $('#viewSearch').hidden = v !== 'search';
+  $('#viewBinder').hidden = v !== 'binder';
+  if(v === 'binder') renderBinder();
+}
+
+/* ---------- Initialisation ---------- */
+document.querySelectorAll('[data-game]').forEach(b => b.addEventListener('click', () => setGame(b.dataset.game)));
+document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+$('#searchForm').addEventListener('submit', e => { e.preventDefault(); search($('#q').value); });
+$('#lang').addEventListener('change', e => { state.lang = e.target.value; state.results = null; state.selected = null; state.query = ''; setStatus(''); renderResults(); renderDetail(); loadShowcase(); });
+
+const dlg = $('#settings');
+$('#openSettings').addEventListener('click', () => { buildSettings(); dlg.showModal(); });
+$('#closeSettings').addEventListener('click', () => dlg.close());
+$('#resetSettings').addEventListener('click', () => {
+  settings = {...DEFAULTS, coef:{...DEFAULTS.coef}}; buildSettings();
+});
+$('#settingsForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const coef = {};
+  CONDITIONS.forEach(c => {
+    const v = parseInt($('#coef-' + c.k).value, 10);
+    coef[c.k] = Number.isFinite(v) ? Math.max(1, Math.min(150, v)) : c.def;
+  });
+  settings = {coef, ref:$('#refSelect').value};
+  save('cote.settings', settings);
+  dlg.close();
+  renderDetail(); renderResults(); renderBinder();
+  toast('Réglages enregistrés');
+});
+
+document.body.dataset.game = state.game;
+renderResults(); renderDetail(); renderBinder();
+loadShowcase();
+})();
+</script>
+</body>
+</html>
